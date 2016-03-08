@@ -57,21 +57,21 @@ class DB_Connection(object):
 			return 1
 		return 0
 
-	def check_password(self, user, password):
+	def check_password(self, c_user, c_password):
 		h = hashlib.md5()
-		h.update(password)
-		current = h.hexdigest()
+		h.update(c_password)
+		current_password = h.hexdigest()
 
-		query = ("select pass as password from users where user_name=\'{}\'".format(user))
+		query = ("select pass as password, user from users where user_name=\'{}\'".format(c_user))
 		self.cursor.execute(query)
 		
-		for password in self.cursor:
-			if password == current:
+		for (password, user) in self.cursor:
+			if password == current_password and user == c_user:
 				print 'authorized'
 			else:
 				print "not authorized"
 				print password
-				print current
+				print current_password
 
 d=DB_Connection()
 user = "cici3"
