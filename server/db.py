@@ -21,9 +21,9 @@ class DB_Connection(object):
 			query = ("INSERT INTO users "
                "(email, user_name, pass) "
                "VALUES (%s, %s, %s)")
-			h = hashlib.md5()
-			h.update(password)
-			password = h.hexdigest()
+			hasher = hashlib.md5()
+			hasher.update(password)
+			password = hasher.hexdigest()
 			
 			data = (email, user, password)
 			self.cursor.execute(query, data)
@@ -58,26 +58,25 @@ class DB_Connection(object):
 		return 0
 
 	def check_password(self, c_user, c_password):
-		h = hashlib.md5()
-		h.update(c_password)
-		current_password = h.hexdigest()
+		hasher = hashlib.md5()
+		hasher.update(c_password)
+		actual_password = hasher.hexdigest()
 
-		query = ("select pass as password, user from users where user_name=\'{}\'".format(c_user))
+		query = ("select pass as password from users where user_name=\'{}\'".format(c_user))
 		self.cursor.execute(query)
 		
-		for (password, user) in self.cursor:
-			if password == current_password and user == c_user:
+		for password in self.cursor:
+			if password[0] == actual_password:
 				print 'authorized'
 			else:
 				print "not authorized"
 				print password
-				print current_password
+				print actual_password
 
 d=DB_Connection()
-user = "cici3"
-d.insert_user(user, "parolalui", "email@e.c")
 
-d.check_password(user,"parolalui")
+#d.insert_user("user1", "password1", "email1@email.co")
 
-d.check_password(user,"parola")
+d.check_password("user1", "password1")
 
+d.check_password("user1", "wrong_password")
