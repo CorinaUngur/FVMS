@@ -1,17 +1,18 @@
 import pika
 import json
 import uuid
+import config
 
 class Client(object):
 
 	logged_in = False
 
 	def __init__(self):
-		self.connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+		self.connection = pika.BlockingConnection(pika.ConnectionParameters(config.broker_ip))
 		self.channel = self.connection.channel()
 
  		self.callback_queue_reg = self.channel.queue_declare(exclusive=True).method.queue
-		self.channel.queue_declare(queue='login', durable=False)
+		self.channel.queue_declare(queue=config.QLOGIN, durable=False)
 		self.channel.basic_consume(self.on_register_response, no_ack=True, queue=self.callback_queue_reg)
 
 
@@ -22,7 +23,7 @@ class Client(object):
 
 		corr_id = str(uuid.uuid4())
 		self.channel.basic_publish(exchange='',
-									routing_key='login',
+									routing_key=config.QLOGIN,
 									properties=pika.BasicProperties(
 									reply_to = self.callback_queue_reg,
 									correlation_id = corr_id,
