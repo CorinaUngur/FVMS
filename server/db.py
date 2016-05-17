@@ -2,6 +2,7 @@ import mysql.connector
 import re
 import hashlib
 
+print "insert_user(user, password, email) \n close_connection() \n check_password(user, password)"
 
 class DB_Connection(object):
 
@@ -58,6 +59,7 @@ class DB_Connection(object):
 		return 0
 
 	def check_password(self, c_user, c_password):
+		result = False
 		hasher = hashlib.md5()
 		hasher.update(c_password)
 		actual_password = hasher.hexdigest()
@@ -68,10 +70,12 @@ class DB_Connection(object):
 		for password in self.cursor:
 			if password[0] == actual_password:
 				print 'authorized'
+				result = True
 			else:
 				print "not authorized"
 				print password
 				print actual_password
+		return result
 
 d=DB_Connection()
 
