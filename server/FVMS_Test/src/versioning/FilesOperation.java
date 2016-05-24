@@ -6,10 +6,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import versioning.Config;
+import utils.Tools;
 import versioning.FileSystem;
+import versioning.tools.Config;
 import versioning.tools.Messages;
-import config.Tools;
 import db.FileSystemDB;
 import db.UsersDB;
 
