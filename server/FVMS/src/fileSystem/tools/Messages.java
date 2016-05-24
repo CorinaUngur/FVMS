@@ -15,8 +15,4 @@ public enum Messages {
 		return message;
 	}
 
-	public static Messages FileAlreadyExists() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
