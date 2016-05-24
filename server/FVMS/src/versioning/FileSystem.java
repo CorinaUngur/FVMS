@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import versioning.tools.Config;
 import versioning.tools.Messages;
 import config.Tools;
 import db.FileSystemDB;
@@ -69,6 +70,10 @@ public class FileSystem {
 			Logger.getGlobal().log(Level.FINE, e.getMessage());
 		}
 		return file_content;
+	}
+	
+	public void removeFile(int id){
+		
 	}
 
 	private String createFolder(int fid) {
