@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import utils.Logger;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,9 +16,7 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
-import com.rabbitmq.client.ShutdownSignalException;
 
 import config.Settings;
 import connection.tools.Config;
@@ -45,9 +43,9 @@ public class Connector {
 			channel.basicConsume(Settings.CONN_QLOGIN, login);
 			startMainLoop();
 		} catch (IOException e) {
-			Logger.getGlobal().log(Level.FINE,e.getMessage());
+			Logger.logERROR(e);
 		} catch (TimeoutException e) {
-			Logger.getGlobal().log(Level.FINE,e.getMessage());
+			Logger.logERROR(e);
 		}
 
 	}
@@ -61,25 +59,15 @@ public class Connector {
 
 	private void startMainLoop() {
 		HashMap<String, String> credentials = null;
-		
+
 		while (true) {
 			QueueingConsumer.Delivery delivery;
 			try {
 				delivery = login.nextDelivery();
 				credentials = getMessage(delivery.getBody());
 				sendLogInResponse(delivery.getProperties(), credentials);
-
-			} catch (ShutdownSignalException e) {
-				Logger.getGlobal().log(Level.FINE,e.getMessage());
-				startMainLoop();
-			} catch (ConsumerCancelledException e) {
-				Logger.getGlobal().log(Level.FINE,e.getMessage());
-				startMainLoop();
-			} catch (IOException e) {
-				Logger.getGlobal().log(Level.FINE,e.getMessage());
-				startMainLoop();
-			} catch (InterruptedException e) {
-				Logger.getGlobal().log(Level.FINE,e.getMessage());
+			} catch (Exception e) {
+				Logger.logERROR(e);
 				startMainLoop();
 			}
 		}
@@ -92,7 +80,7 @@ public class Connector {
 
 		String message = new String(deliveryBody);
 		System.out.println(message);
-		//String body = message.substring(1, message.length() - 1);
+		// String body = message.substring(1, message.length() - 1);
 		ObjectMapper mapper = new ObjectMapper();
 
 		credentials = mapper.readValue(message,
@@ -117,8 +105,8 @@ public class Connector {
 				authorization = "0";
 			}
 		} else {
-			authorization="0";
-			result=Messages.MessageInWrongFormat.toString();
+			authorization = "0";
+			result = Messages.MessageInWrongFormat.toString();
 		}
 		HashMap<String, String> responseMap = new HashMap<>();
 		responseMap.put("authorized", authorization);
@@ -139,7 +127,7 @@ public class Connector {
 		try {
 			channel.basicPublish("", props.getReplyTo(), replyToProps, message);
 		} catch (IOException e) {
-			Logger.getGlobal().log(Level.FINE,e.getMessage());
+			Logger.logERROR(e);
 		}
 
 	}

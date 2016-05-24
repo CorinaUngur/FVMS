@@ -5,9 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import utils.Logger;
 import utils.Tools;
 import versioning.tools.Messages;
 import config.Settings;
@@ -34,7 +33,7 @@ public class FileSystem {
 					String datetime = LocalDateTime.now().toString();
 					String dbResult = fsdb.addNewFile(fid, email, file_path,
 							hash, datetime);
-					Logger.getGlobal().log(Level.INFO, dbResult);
+					Logger.logINFO(dbResult);
 					result = Messages.File_added;
 				}
 			} else {
@@ -53,7 +52,7 @@ public class FileSystem {
 			String datetime = LocalDateTime.now().toString();
 			String dbResult = fsdb.addChange(fid, datetime, hash, email,
 					message, file_path);
-			Logger.getGlobal().log(Level.INFO, dbResult);
+			Logger.logINFO(dbResult);
 			result = Messages.File_added;
 		}
 		return result.toString();
@@ -67,7 +66,7 @@ public class FileSystem {
 			fis.read(file_content);
 			fis.close();
 		} catch (IOException e) {
-			Logger.getGlobal().log(Level.FINE, e.getMessage());
+			Logger.logERROR(e);
 		}
 		return file_content;
 	}
@@ -83,7 +82,7 @@ public class FileSystem {
 		folder_path = Settings.FS_ROOTFOLDER + folder_name;
 		File folder = new File(folder_path);
 		if (folder.exists()) {
-			Logger.getGlobal().log(Level.INFO,
+			Logger.logINFO(
 					"Folder '" + folder_path + "' already exists");
 		} else {
 			boolean folder_created = folder.mkdir();
@@ -110,15 +109,15 @@ public class FileSystem {
 				fos.flush();
 				fos.close();
 
-				Logger.getGlobal().log(Level.INFO,
+				Logger.logINFO(
 						Messages.File_added.toString());
 			} else {
 
-				Logger.getGlobal().log(Level.INFO,
+				Logger.logINFO(
 						Messages.File_addingFailed.toString());
 			}
 		} catch (IOException e) {
-			Logger.getGlobal().log(Level.FINE, e.getMessage());
+			Logger.logERROR(e);
 		}
 
 		return file_created ? file_path : null;

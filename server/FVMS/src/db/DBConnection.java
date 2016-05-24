@@ -5,9 +5,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import utils.Logger;
 import config.Settings;
 import db.tools.Columns;
 import db.tools.Tables;
@@ -35,7 +34,7 @@ public class DBConnection {
 		} catch (SQLException ex) {
 			logSQLException("DBConnection", ex);
 		} catch (Exception ex) {
-			Logger.getGlobal().log(Level.FINE, ex.getMessage());
+
 		}
 	}
 
@@ -46,8 +45,7 @@ public class DBConnection {
 					+ "=\"" + value + "\";";
 			rows_removed = executeUpdate(statement);
 			if (rows_removed > 0) {
-				Logger.getGlobal().info(
-						rows_removed + " rows successfully deleted");
+				Logger.logINFO(rows_removed + " rows successfully deleted");
 			}
 			closeResultSetAndStatement();
 		}
@@ -55,10 +53,8 @@ public class DBConnection {
 	}
 
 	public void logSQLException(String method_name, SQLException ex) {
-		Logger.getGlobal().log(
-				Level.FINE,
-				"SQLState: " + ex.getSQLState() + ", " + method_name + ": "
-						+ ex.getMessage());
+		Logger.logERROR(ex, "SQLState: " + ex.getSQLState() + ", "
+				+ method_name);
 	}
 
 	public void closeResultSetAndStatement() {
@@ -88,10 +84,10 @@ public class DBConnection {
 		boolean inValidFormat = email
 				.matches("[A-Za-z_.0-9]+@[A-Za-z_.0-9]+\\.[A-Za-z_.0-9]+");
 		if (isAlreadyPresent) {
-			Logger.getGlobal().info("Email is already used: " + email);
+			Logger.logINFO("Email is already used: " + email);
 		}
 		if (!inValidFormat) {
-			Logger.getGlobal().info("Email is not in a valid format: " + email);
+			Logger.logINFO("Email is not in a valid format: " + email);
 		}
 		return !isAlreadyPresent && inValidFormat;
 	}
@@ -116,8 +112,8 @@ public class DBConnection {
 			;
 			if (stmt != null) {
 				if (!stmt.isClosed()) {
-					Logger.getGlobal().warning(
-							"Statement: '" + statement + notClosedMessage);
+					Logger.logWARNING("Statement: '" + statement
+							+ notClosedMessage);
 					readyToRun = true;
 				}
 			} else {
@@ -125,7 +121,7 @@ public class DBConnection {
 			}
 			if (rs != null) {
 				if (!rs.isClosed()) {
-					Logger.getGlobal().warning("Statement " + notClosedMessage);
+					Logger.logWARNING("Statement " + notClosedMessage);
 					readyToRun &= true;
 				}
 			} else {

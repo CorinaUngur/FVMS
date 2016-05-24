@@ -1,8 +1,8 @@
 package db;
 
 import java.sql.SQLException;
-import java.util.logging.Logger;
 
+import utils.Logger;
 import utils.Tools;
 import db.tools.Columns;
 import db.tools.Messages;
@@ -324,7 +324,7 @@ public class UsersDB extends DBConnection {
 					result = Messages.Login_succesfull.toString();
 				} else {
 					result = Messages.Login_failed.toString();
-					Logger.getGlobal().info(
+					Logger.logINFO(
 							"Login failed: '" + password
 									+ "' does not match actual password: "
 									+ actual_password);

@@ -1,9 +1,8 @@
 package db;
 
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import utils.Logger;
 import versioning.tools.Config;
 import db.tools.Columns;
 import db.tools.Messages;
@@ -48,8 +47,7 @@ public class FileSystemDB {
 				}
 				db.closeResultSetAndStatement();
 			} else {
-				Logger.getGlobal().log(Level.FINE,
-						"Last CID could not be read.");
+				Logger.logWARNING("Last CID could not be read.");
 			}
 		} else {
 			nextAvailableFileID += 1;
@@ -129,7 +127,7 @@ public class FileSystemDB {
 					+ Tables.CHANGES + " WHERE " + Columns.Changes_Hash + "=\""
 					+ hash + "\";";
 			result = getPath(statement);
-			
+
 		}
 		return result;
 	}
