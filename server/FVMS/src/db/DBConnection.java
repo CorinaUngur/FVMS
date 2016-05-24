@@ -8,8 +8,8 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import config.Settings;
 import db.tools.Columns;
-import db.tools.Config;
 import db.tools.Tables;
 
 public class DBConnection {
@@ -29,9 +29,8 @@ public class DBConnection {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 			conn = DriverManager.getConnection("jdbc:mysql://"
-					+ Config.ULR.getString() + "/fvms?" + "user="
-					+ Config.USER.getString() + "&password="
-					+ Config.PASSWORD.getString());
+					+ Settings.DB_URL + "/fvms?" + "user=" + Settings.DB_USER
+					+ "&password=" + Settings.DB_PASSWORD);
 
 		} catch (SQLException ex) {
 			logSQLException("DBConnection", ex);

@@ -20,6 +20,7 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 
+import config.Settings;
 import connection.tools.Config;
 import db.UsersDB;
 import db.tools.Messages;
@@ -32,16 +33,16 @@ public class Connector {
 
 	private Connector() {
 		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost(Config.HOST.toString());
+		factory.setHost(Settings.CONN_HOST);
 		try {
 			Connection connection = factory.newConnection();
 			channel = connection.createChannel();
 			Map<String, Object> args = new HashMap<String, Object>();
 			args.put("x-message-ttl", Config.MessageExpirationTime.getInt());
-			channel.queueDeclare(Config.QLogin.toString(), false, false, false,
+			channel.queueDeclare(Settings.CONN_QLOGIN, false, false, false,
 					args);
 			create_consumers();
-			channel.basicConsume(Config.QLogin.toString(), login);
+			channel.basicConsume(Settings.CONN_QLOGIN, login);
 			startMainLoop();
 		} catch (IOException e) {
 			Logger.getGlobal().log(Level.FINE,e.getMessage());

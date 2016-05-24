@@ -1,8 +1,6 @@
 package connection.tools;
 
 public enum Config {
-	QLogin("QLogin"),
-	HOST("localhost"),
 	
 	MessageExpirationTime(60*1000);
 	

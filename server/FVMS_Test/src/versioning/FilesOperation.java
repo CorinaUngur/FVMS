@@ -7,9 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import utils.Tools;
-import versioning.FileSystem;
-import versioning.tools.Config;
 import versioning.tools.Messages;
+import config.Settings;
 import db.FileSystemDB;
 import db.UsersDB;
 
@@ -32,7 +31,7 @@ public class FilesOperation {
 		fileName = "testFile.txt";
 		message = "test message";
 		fsdb.removeAllFiles();
-		Tools.removeAllFiles(Config.ROOT_FOLDER.toString());
+		Tools.removeAllFiles(Settings.FS_ROOTFOLDER);
 	}
 
 	@Test

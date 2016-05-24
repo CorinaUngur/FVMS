@@ -2,15 +2,10 @@ package versioning.tools;
 
 public enum Config {
 	
-	ROOT_FOLDER("E:/fvms/root_folder/"),
-	
-	TRASH_ENABLED(true),
-	
 	NEWFILE_DEFAULTMESSAGE("new file default message");
 	
 	private String value;
 	private int intValue;
-	private boolean boolValue;
 	
 	Config(){
 		value = null;
@@ -21,9 +16,6 @@ public enum Config {
 	Config(int intValue){
 		this.intValue = intValue;
 	}	
-	Config(boolean value){
-		this.boolValue = value;
-	}
 	
 	@Override
 	public String toString() {

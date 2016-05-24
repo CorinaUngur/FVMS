@@ -9,8 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import utils.Tools;
-import versioning.tools.Config;
 import versioning.tools.Messages;
+import config.Settings;
 import db.FileSystemDB;
 
 public class FileSystem {
@@ -29,10 +29,11 @@ public class FileSystem {
 			String folder_path = createFolder(fid);
 			if (folder_path != null) {
 				file_path = createFile(fid, file_name, file_content);
-				if(file_path != null){
+				if (file_path != null) {
 					hash = Tools.hashContent(file_content);
 					String datetime = LocalDateTime.now().toString();
-					String dbResult = fsdb.addNewFile(fid, email, file_path, hash, datetime);
+					String dbResult = fsdb.addNewFile(fid, email, file_path,
+							hash, datetime);
 					Logger.getGlobal().log(Level.INFO, dbResult);
 					result = Messages.File_added;
 				}
@@ -43,16 +44,15 @@ public class FileSystem {
 		return result.toString();
 	}
 
-	
-
 	public String addChange(int fid, String email, byte[] file_content,
 			String file_name, String message) {
 		Messages result = null;
-		String file_path= createFile(fid, file_name, file_content);
+		String file_path = createFile(fid, file_name, file_content);
 		if (file_path != null) {
 			String hash = Tools.hashContent(file_content);
 			String datetime = LocalDateTime.now().toString();
-			String dbResult = fsdb.addChange(fid, datetime, hash, email, message, file_path);
+			String dbResult = fsdb.addChange(fid, datetime, hash, email,
+					message, file_path);
 			Logger.getGlobal().log(Level.INFO, dbResult);
 			result = Messages.File_added;
 		}
@@ -71,16 +71,16 @@ public class FileSystem {
 		}
 		return file_content;
 	}
-	
-	public void removeFile(int id){
-		
+
+	public void removeFile(int id) {
+
 	}
 
 	private String createFolder(int fid) {
 		String folder_path = null;
 
 		String folder_name = fid + "";
-		folder_path = Config.ROOT_FOLDER + folder_name;
+		folder_path = Settings.FS_ROOTFOLDER + folder_name;
 		File folder = new File(folder_path);
 		if (folder.exists()) {
 			Logger.getGlobal().log(Level.INFO,
@@ -94,17 +94,17 @@ public class FileSystem {
 		}
 		return folder_path;
 	}
+
 	private String createFile(int fid, String file_name, byte[] file_content) {
 		file_name = Tools.getDateTimeNow() + " " + file_name;
-		String file_path = Config.ROOT_FOLDER.toString() + fid + "/"
-				+ file_name;
+		String file_path = Settings.FS_ROOTFOLDER + fid + "/" + file_name;
 		FileOutputStream fos;
 		boolean file_created = false;
 		try {
 			File file = new File(file_path);
 			file_created = file.createNewFile();
 			if (file_created) {
-				
+
 				fos = new FileOutputStream(file);
 				fos.write(file_content);
 				fos.flush();
