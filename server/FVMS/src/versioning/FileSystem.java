@@ -1,4 +1,4 @@
-package fileSystem;
+package versioning;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import versioning.tools.Messages;
 import config.Tools;
 import db.FileSystemDB;
-import fileSystem.tools.Messages;
 
 public class FileSystem {
 	FileSystemDB fsdb = FileSystemDB.getInstance();

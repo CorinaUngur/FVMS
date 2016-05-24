@@ -4,10 +4,10 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import versioning.Config;
 import db.tools.Columns;
 import db.tools.Messages;
 import db.tools.Tables;
-import fileSystem.Config;
 
 public class FileSystemDB {
 	private DBConnection db = null;
