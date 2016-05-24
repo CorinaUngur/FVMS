@@ -6,12 +6,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import versioning.Config;
+import versioning.FileSystem;
+import versioning.tools.Messages;
 import config.Tools;
 import db.FileSystemDB;
 import db.UsersDB;
-import fileSystem.Config;
-import fileSystem.FileSystem;
-import fileSystem.tools.Messages;
 
 public class FilesOperation {
 	FileSystem fs = null;
