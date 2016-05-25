@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import utils.Logger;
 import versioning.tools.Config;
+import config.Settings;
 import db.tools.Columns;
 import db.tools.Messages;
 import db.tools.Tables;
@@ -74,27 +75,6 @@ public class FileSystemDB {
 		return db.removeRow_byValue(hash, Columns.Changes_Hash, Tables.CHANGES);
 	}
 
-	private String insertChange(int cid, int id, String datetime, String hash,
-			String owner, String message, String path) {
-		Messages result = null;
-		boolean fileIsAlreadySaved = isFileInDB(hash);
-		if (fileIsAlreadySaved) {
-			result = Messages.File_alreadySaved;
-		} else {
-			int uid = udb.getID(owner, Columns.USERS_email, Columns.USERS_Id,
-					Tables.USERS);
-			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
-					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\"";
-			int rows_affected = db.insertRowIntoTable(values, Tables.CHANGES);
-			if (rows_affected > 0) {
-				result = Messages.Change_added;
-			} else {
-				result = Messages.Change_addingFailed;
-			}
-		}
-		return result.toString();
-	}
-
 	public String getLastChangePath(int fid) {
 		String result = null;
 		if (db.isValuePresentInTable(fid, Columns.Changes_FID, Tables.CHANGES)) {
@@ -132,6 +112,66 @@ public class FileSystemDB {
 		return result;
 	}
 
+	public int removeAllFiles() {
+		int rows_deleted = 0;
+
+		String statement = "Delete from " + Tables.CHANGES;
+		rows_deleted = db.executeUpdate(statement);
+		db.closeResultSetAndStatement();
+		return rows_deleted;
+	}
+
+	public String[] getFileVersions(int id) {
+		String statement = "SELECT COUNT(" + Columns.Changes_FID + ") FROM "
+				+ Tables.CHANGES;
+		db.executeUpdate(statement);
+		statement = "SELECT " + Columns.Changes_Path + " FROM "
+				+ Tables.CHANGES + " WHERE " + Columns.Changes_FID + "=\"" + id
+				+ "\";";
+		int filesNo = db.executeUpdate(statement);
+		db.closeResultSetAndStatement();
+		String[] result = null;
+		if (filesNo > 0) {
+			result = new String[filesNo];
+			int index = 0;
+			try {
+				while (db.getResultSet().next()) {
+					String path = db.getResultSet().getString(1);
+					result[index] = path;
+					index++;
+				}
+			} catch (SQLException e) {
+				Logger.logERROR(e);
+			}
+		}
+		return result;
+	}
+
+	public String getFileFolder(int id) {
+		return Settings.FS_ROOTFOLDER + id;
+	}
+
+	private String insertChange(int cid, int id, String datetime, String hash,
+			String owner, String message, String path) {
+		Messages result = null;
+		boolean fileIsAlreadySaved = isFileInDB(hash);
+		if (fileIsAlreadySaved) {
+			result = Messages.File_alreadySaved;
+		} else {
+			int uid = udb.getID(owner, Columns.USERS_email, Columns.USERS_Id,
+					Tables.USERS);
+			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
+					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\"";
+			int rows_affected = db.insertRowIntoTable(values, Tables.CHANGES);
+			if (rows_affected > 0) {
+				result = Messages.Change_added;
+			} else {
+				result = Messages.Change_addingFailed;
+			}
+		}
+		return result.toString();
+	}
+
 	private String getPath(String statement) {
 		String result = null;
 		boolean weHaveResults = false;
@@ -152,12 +192,4 @@ public class FileSystemDB {
 		return result;
 	}
 
-	public int removeAllFiles() {
-		int rows_deleted = 0;
-
-		String statement = "Delete from " + Tables.CHANGES;
-		rows_deleted = db.executeUpdate(statement);
-		db.closeResultSetAndStatement();
-		return rows_deleted;
-	}
 }
