@@ -117,17 +117,20 @@ public class FileSystemDB {
 
 		String statement = "Delete from " + Tables.CHANGES;
 		rows_deleted = db.executeUpdate(statement);
-		db.closeResultSetAndStatement();
 		return rows_deleted;
 	}
 	public int moveFileToTrash(int id){
 		int filesUpdated = 0;
 		String statement = "UPDATE " + Tables.CHANGES + " SET " + Columns.Changes_Status + "=" + Config.STATUS_MOVEDTOTRASH + " WHERE " + Columns.Changes_FID + "=" + id;
 		filesUpdated = db.executeUpdate(statement);
-		db.closeResultSetAndStatement();
 		return filesUpdated;
 	}
-
+	public int deleteTrashFiles(){
+		int removedFiles = 0;
+		String statement = "DELETE FROM " + Tables.CHANGES + " WHERE " + Columns.Changes_Status + "=" + Config.STATUS_MOVEDTOTRASH;
+		removedFiles = db.executeUpdate(statement);
+		return removedFiles;
+	}
 	public String[] getFileVersions(int id) {
 		String statement = "SELECT COUNT(" + Columns.Changes_FID + ") FROM "
 				+ Tables.CHANGES;
