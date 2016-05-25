@@ -13,6 +13,7 @@ import versioning.tools.Messages;
 import config.Settings;
 import db.FileSystemDB;
 import db.UsersDB;
+import db.tools.Config;
 
 public class FilesOperation {
 	FileSystem fs = null;
@@ -70,19 +71,22 @@ public class FilesOperation {
 	}
 
 	@Test
-	public void removeFile_trashEnabled_validFile() {
+	public void moveToTrash_validFile() {
 		fs.add_newFile(standard_content, fileName, userEmail);
 		int id = fsdb.getChangeID(Tools.hashContent(standard_content));
 		byte[] changed_content = "changed content".getBytes();
 		fs.addChange(id, userEmail, changed_content, fileName, "test change");
 
-		String result = fs.removeFile(id);
+		String result = fs.moveFileToTrash(id);
 		Assert.assertEquals(Messages.File_removed.toString(), result);
 
 		File folder = new File(Settings.FS_ROOTFOLDER + id);
 		Assert.assertFalse(folder.exists());
 
 		File trashFolder = new File(Settings.TRASH_FOLDER + id);
-		Assert.assertFalse(trashFolder.exists());
+		Assert.assertTrue(trashFolder.exists());
+		
+		int currentStatus = fsdb.getStatus(id);
+		Assert.assertEquals(Config.STATUS_MOVEDTOTRASH.getInt(), currentStatus);
 	}
 }
