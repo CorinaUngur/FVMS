@@ -127,6 +127,7 @@ public class FileSystem {
 		Tools.removeAllFiles(Settings.TRASH_FOLDER);
 		if ((new File(Settings.TRASH_FOLDER)).list().length == 0) {
 			result = Messages.Trash_empty;
+			fsdb.deleteTrashFiles();
 		} else {
 			result = Messages.Trash_notEmpty;
 		}
