@@ -89,4 +89,20 @@ public class FilesOperation {
 		int currentStatus = fsdb.getStatus(id);
 		Assert.assertEquals(Config.STATUS_MOVEDTOTRASH.getInt(), currentStatus);
 	}
+	@Test
+	public void emptyTrash_2VersionsFile(){
+		fs.add_newFile(standard_content, fileName, userEmail);
+		int id = fsdb.getChangeID(Tools.hashContent(standard_content));
+		byte[] changed_content = "changed content".getBytes();
+		fs.addChange(id, userEmail, changed_content, fileName, "test change");
+
+		String result = fs.emptyTrash();
+		Assert.assertEquals(Messages.Trash_empty.toString(), result);
+
+		File trashFolder = new File(Settings.TRASH_FOLDER);
+		Assert.assertTrue(trashFolder.list().length == 0);
+		
+		int remainedFilesInDB = fsdb.deleteTrashFiles();
+		Assert.assertEquals(0, remainedFilesInDB);
+	}
 }
