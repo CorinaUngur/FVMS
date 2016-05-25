@@ -3,7 +3,7 @@ package db;
 import java.sql.SQLException;
 
 import utils.Logger;
-import versioning.tools.Config;
+import db.tools.Config;
 import config.Settings;
 import db.tools.Columns;
 import db.tools.Messages;
@@ -120,6 +120,13 @@ public class FileSystemDB {
 		db.closeResultSetAndStatement();
 		return rows_deleted;
 	}
+	public int moveFileToTrash(int id){
+		int filesUpdated = 0;
+		String statement = "UPDATE " + Tables.CHANGES + " SET " + Columns.Changes_Status + "=" + Config.STATUS_MOVEDTOTRASH + " WHERE " + Columns.Changes_FID + "=" + id;
+		filesUpdated = db.executeUpdate(statement);
+		db.closeResultSetAndStatement();
+		return filesUpdated;
+	}
 
 	public String[] getFileVersions(int id) {
 		String statement = "SELECT COUNT(" + Columns.Changes_FID + ") FROM "
@@ -161,7 +168,7 @@ public class FileSystemDB {
 			int uid = udb.getID(owner, Columns.USERS_email, Columns.USERS_Id,
 					Tables.USERS);
 			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
-					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\"";
+					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\"," + Config.STATUS_AVAILABLE;
 			int rows_affected = db.insertRowIntoTable(values, Tables.CHANGES);
 			if (rows_affected > 0) {
 				result = Messages.Change_added;

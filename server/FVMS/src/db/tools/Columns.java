@@ -3,7 +3,7 @@ package db.tools;
 public enum Columns {
 
 	USERS_username("user_name"), USERS_password("pass"), USERS_email("email"), TEAMS_name(
-			"team_name"), USERS_Id("uid"), TEAMS_Id("tid"), Changes_Hash("hash"), Changes_Path("path"), Changes_ID("cid"), Changes_FID("fid");
+			"team_name"), USERS_Id("uid"), TEAMS_Id("tid"), Changes_Hash("hash"), Changes_Path("path"), Changes_ID("cid"), Changes_FID("fid"), Changes_Status("status");
 
 	public String column_name = "";
 
