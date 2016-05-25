@@ -51,8 +51,7 @@ public class UsersDB extends DBConnection {
 			password = Tools.hashString(password);
 			String statement = "insert into users values(default,\"" + email
 					+ "\",\"" + username + "\",\"" + password + "\");";
-			executeStatement(statement);
-			closeResultSetAndStatement();
+			executeUpdate(statement);
 			result_message = Messages.User_inserted.toString();
 		} else {
 			if (!username_ok) {
