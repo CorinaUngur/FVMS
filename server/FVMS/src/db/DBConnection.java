@@ -108,11 +108,11 @@ public class DBConnection {
 	public boolean stmtAndRs_NullOrClosed(String statement) {
 		boolean readyToRun = false;
 		try {
-			String notClosedMessage = "' not closed after last use. Close statement and result set after each use!!";
+			String notClosedMessage = "'I found out that you did not closed ResultSet and Statement after last use. Close statement and result set after each use!!";
 			;
 			if (stmt != null) {
 				if (!stmt.isClosed()) {
-					Logger.logWARNING("Statement: '" + statement
+					Logger.logWARNING("While trying to ececute statement: '" + statement
 							+ notClosedMessage);
 					readyToRun = true;
 				}
@@ -162,6 +162,7 @@ public class DBConnection {
 				if (rowsUpdated > 0) {
 					rs = stmt.getResultSet();
 				}
+				closeResultSetAndStatement();
 			} catch (SQLException ex) {
 				logSQLException("executeUpdate: " + statement, ex);
 			}
