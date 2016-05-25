@@ -90,6 +90,8 @@ public class FileSystem {
 				}
 				Logger.logINFO(filesMoved + " out of " + folder.list().length
 						+ " moved to trash for file id: " + id);
+
+				fsdb.moveFileToTrash(id);
 				result = Messages.File_removed.toString();
 
 			} else {
