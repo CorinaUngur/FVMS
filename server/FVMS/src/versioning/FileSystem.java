@@ -76,6 +76,7 @@ public class FileSystem {
 		String path = fsdb.getFileFolder(id);
 		File folder = new File(path);
 		int filesMoved = 0;
+		int toalFilesNo = folder.list().length;
 		if (folder.isDirectory()) {
 			File folderInTrash = new File(Settings.TRASH_FOLDER
 					+ folder.getName());
@@ -88,7 +89,7 @@ public class FileSystem {
 							.getPath() + "/" + file_name));
 					filesMoved += fileMoved ? 1 : 0;
 				}
-				Logger.logINFO(filesMoved + " out of " + folder.list().length
+				Logger.logINFO(filesMoved + " out of " + toalFilesNo
 						+ " moved to trash for file id: " + id);
 
 				fsdb.moveFileToTrash(id);
@@ -98,6 +99,7 @@ public class FileSystem {
 				Logger.logWARNING("Folder was not created in trash. Moving files will not be performed");
 				result = Messages.File_removingFailed.toString();
 			}
+			folder.delete();
 		}
 		return result;
 	}
