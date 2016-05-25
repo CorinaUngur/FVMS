@@ -70,43 +70,22 @@ public class FileSystem {
 		}
 		return file_content;
 	}
-
+	public String moveAllFilesToTrash(){
+		return moveAllFiles(new File(Settings.FS_ROOTFOLDER), new File(Settings.TRASH_FOLDER));
+	}
 	public String moveFileToTrash(int id) {
 		String result = null;
-		String path = fsdb.getFileFolder(id);
+		File rootFolder = new File(Settings.FS_ROOTFOLDER);
+		File trashFolder = new File(Settings.TRASH_FOLDER);
+		String path = getFileFolder(rootFolder,id);
 		File folder = new File(path);
-		int filesMoved = 0;
-		int toalFilesNo = folder.list().length;
-		if (folder.isDirectory()) {
-			File folderInTrash = new File(Settings.TRASH_FOLDER
-					+ folder.getName());
-			boolean folderCreated = folderInTrash.mkdir();
-			if (folderCreated) {
-				for (String file_name : folder.list()) {
-					String file_path = folder.getPath() + "/" + file_name;
-					File file = new File(file_path);
-					boolean fileMoved = file.renameTo(new File(folderInTrash
-							.getPath() + "/" + file_name));
-					filesMoved += fileMoved ? 1 : 0;
-				}
-				Logger.logINFO(filesMoved + " out of " + toalFilesNo
-						+ " moved to trash for file id: " + id);
-
-				fsdb.moveFileToTrash(id);
-				result = Messages.File_removed.toString();
-
-			} else {
-				Logger.logWARNING("Folder was not created in trash. Moving files will not be performed");
-				result = Messages.File_removingFailed.toString();
-			}
-			folder.delete();
-		}
+		result = moveFile(folder, rootFolder, trashFolder);
 		return result;
 	}
 
 	public String removeFile(int id) {
 		String result = null;
-		String path = fsdb.getFileFolder(id);
+		String path = getFileFolder(new File(Settings.FS_ROOTFOLDER), id);
 		File folder = new File(path);
 		int filesMoved = 0;
 		int totalFilesNo = folder.list().length;
@@ -158,6 +137,53 @@ public class FileSystem {
 		return result;
 	}
 
+	public String retrieveFilesFromTrash() {
+		String result="";
+		File rootFolder = new File(Settings.FS_ROOTFOLDER);
+		File trashFolder = new File(Settings.TRASH_FOLDER);
+		moveAllFiles(trashFolder, rootFolder);
+		return result;
+	}
+	private String moveAllFiles(File source, File dest){
+		String result="";
+		File trashFolder = new File(Settings.TRASH_FOLDER);
+		for(File f : source.listFiles()){
+			if(!f.equals(trashFolder)){
+				moveFile(f, source, dest);
+			}
+		}
+		return result;
+	}
+	private String moveFile(File folder, File source, File dest) {
+		String result = null;
+		int filesMoved = 0;
+		int toalFilesNo = folder.list().length;
+		if (folder.isDirectory()) {
+			boolean folderCreated = dest.mkdir();
+			if (folderCreated) {
+				for (String file_name : folder.list()) {
+					String file_path = folder.getPath() + "/" + file_name;
+					File file = new File(file_path);
+					boolean fileMoved = file.renameTo(new File(dest.getPath()
+							+ "/" + file_name));
+					filesMoved += fileMoved ? 1 : 0;
+				}
+				Logger.logINFO(filesMoved + " out of " + toalFilesNo
+						+ " moved from " + source.getPath() + " to "
+						+ dest.getPath() + " for file id: " + Integer.valueOf(folder.getName()));
+
+				fsdb.moveFileToTrash(Integer.valueOf(folder.getName()));
+				result = Messages.File_removed.toString();
+
+			} else {
+				Logger.logWARNING("Folder was not created in trash. Moving files will not be performed");
+				result = Messages.File_removingFailed.toString();
+			}
+			folder.delete();
+		}
+		return result;
+	}
+
 	private String createFolder(int fid) {
 		String folder_path = null;
 
@@ -201,6 +227,10 @@ public class FileSystem {
 		}
 
 		return file_created ? file_path : null;
+	}
+
+	public String getFileFolder(File source, int id) {
+		return source.getPath() + "/" + id;
 	}
 
 }

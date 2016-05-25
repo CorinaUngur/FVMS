@@ -1,11 +1,11 @@
 package db;
 
+import java.io.File;
 import java.sql.SQLException;
 
 import utils.Logger;
-import db.tools.Config;
-import config.Settings;
 import db.tools.Columns;
+import db.tools.Config;
 import db.tools.Messages;
 import db.tools.Tables;
 
@@ -119,18 +119,24 @@ public class FileSystemDB {
 		rows_deleted = db.executeUpdate(statement);
 		return rows_deleted;
 	}
-	public int moveFileToTrash(int id){
+
+	public int moveFileToTrash(int id) {
 		int filesUpdated = 0;
-		String statement = "UPDATE " + Tables.CHANGES + " SET " + Columns.Changes_Status + "=" + Config.STATUS_MOVEDTOTRASH + " WHERE " + Columns.Changes_FID + "=" + id;
+		String statement = "UPDATE " + Tables.CHANGES + " SET "
+				+ Columns.Changes_Status + "=" + Config.STATUS_MOVEDTOTRASH
+				+ " WHERE " + Columns.Changes_FID + "=" + id;
 		filesUpdated = db.executeUpdate(statement);
 		return filesUpdated;
 	}
-	public int deleteTrashFiles(){
+
+	public int deleteTrashFiles() {
 		int removedFiles = 0;
-		String statement = "DELETE FROM " + Tables.CHANGES + " WHERE " + Columns.Changes_Status + "=" + Config.STATUS_MOVEDTOTRASH;
+		String statement = "DELETE FROM " + Tables.CHANGES + " WHERE "
+				+ Columns.Changes_Status + "=" + Config.STATUS_MOVEDTOTRASH;
 		removedFiles = db.executeUpdate(statement);
 		return removedFiles;
 	}
+
 	public String[] getFileVersions(int id) {
 		String statement = "SELECT COUNT(" + Columns.Changes_FID + ") FROM "
 				+ Tables.CHANGES;
@@ -157,9 +163,7 @@ public class FileSystemDB {
 		return result;
 	}
 
-	public String getFileFolder(int id) {
-		return Settings.FS_ROOTFOLDER + id;
-	}
+
 
 	private String insertChange(int cid, int id, String datetime, String hash,
 			String owner, String message, String path) {
@@ -171,7 +175,8 @@ public class FileSystemDB {
 			int uid = udb.getID(owner, Columns.USERS_email, Columns.USERS_Id,
 					Tables.USERS);
 			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
-					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\"," + Config.STATUS_AVAILABLE;
+					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\","
+					+ Config.STATUS_AVAILABLE;
 			int rows_affected = db.insertRowIntoTable(values, Tables.CHANGES);
 			if (rows_affected > 0) {
 				result = Messages.Change_added;
@@ -181,18 +186,21 @@ public class FileSystemDB {
 		}
 		return result.toString();
 	}
-	public int getStatus(int id){
+
+	public int getStatus(int id) {
 		int status = -1;
-		String statement = "SELECT " + Columns.Changes_Status + " FROM " + Tables.CHANGES + " WHERE " + Columns.Changes_FID+"="+id;
+		String statement = "SELECT " + Columns.Changes_Status + " FROM "
+				+ Tables.CHANGES + " WHERE " + Columns.Changes_FID + "=" + id;
 		db.executeStatement(statement);
 		try {
 			db.getResultSet().first();
-			status= db.getResultSet().getInt(1);
+			status = db.getResultSet().getInt(1);
 		} catch (SQLException e) {
 			Logger.logERROR(e);
 		}
 		return status;
 	}
+
 	private String getPath(String statement) {
 		String result = null;
 		boolean weHaveResults = false;
