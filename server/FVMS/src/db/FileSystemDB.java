@@ -178,7 +178,17 @@ public class FileSystemDB {
 		}
 		return result.toString();
 	}
-
+	public int getStatus(int id){
+		int status = -1;
+		String statement = "SELECT " + Columns.Changes_Status + " FROM " + Tables.CHANGES + " WHERE " + Columns.Changes_FID+"="+id;
+		db.executeStatement(statement);
+		try {
+			status= db.getResultSet().getInt(1);
+		} catch (SQLException e) {
+			Logger.logERROR(e);
+		}
+		return status;
+	}
 	private String getPath(String statement) {
 		String result = null;
 		boolean weHaveResults = false;
