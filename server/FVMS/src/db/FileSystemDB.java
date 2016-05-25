@@ -183,6 +183,7 @@ public class FileSystemDB {
 		String statement = "SELECT " + Columns.Changes_Status + " FROM " + Tables.CHANGES + " WHERE " + Columns.Changes_FID+"="+id;
 		db.executeStatement(statement);
 		try {
+			db.getResultSet().first();
 			status= db.getResultSet().getInt(1);
 		} catch (SQLException e) {
 			Logger.logERROR(e);
