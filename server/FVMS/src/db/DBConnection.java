@@ -209,4 +209,24 @@ public class DBConnection {
 		return result;
 	}
 
+	public int removeRow_byValue(int intVal, Columns column, Tables table) {
+		int rows_removed = 0;
+		if (isValuePresentInTable(intVal, column, table)) {
+			String statement = "DELETE FROM " + table + " WHERE " + column
+					+ "=" + intVal + ";";
+			rows_removed = executeUpdate(statement);
+			if (rows_removed > 0) {
+				Logger.logINFO(rows_removed + " rows successfully deleted");
+			}
+			closeResultSetAndStatement();
+		}
+		return rows_removed;
+	}
+	public int setStringValue_byID(String newValue, Columns valColumn, int id, Columns idColumn, Tables table){
+		int rowsUpdated=0;
+		String statement = "UPDATE " + table + " SET " + valColumn + "=\"" + newValue +"\" WHERE " + idColumn + "=" + id;
+		rowsUpdated = executeUpdate(statement);
+		return rowsUpdated;
+	}
+
 }
