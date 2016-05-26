@@ -1,6 +1,5 @@
 package db;
 
-import java.io.File;
 import java.sql.SQLException;
 
 import utils.Logger;
@@ -162,8 +161,6 @@ public class FileSystemDB {
 		}
 		return result;
 	}
-
-
 
 	private String insertChange(int cid, int id, String datetime, String hash,
 			String owner, String message, String path) {
