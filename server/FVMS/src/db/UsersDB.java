@@ -8,11 +8,12 @@ import db.tools.Columns;
 import db.tools.Messages;
 import db.tools.Tables;
 
-public class UsersDB extends DBConnection {
+public class UsersDB {
 	private static UsersDB instance = null;
+	private DBConnection db = null;
 
 	private UsersDB() {
-		super();
+		db = DBConnection.getInstance();
 	}
 
 	public static UsersDB getInstance() {
@@ -23,35 +24,35 @@ public class UsersDB extends DBConnection {
 
 	public void printAllUsers() {
 		String statement = "Select * from users";
-		executeStatement(statement);
+		db.executeStatement(statement);
 		try {
-			while (getResultSet().next()) {
+			while (db.getResultSet().next()) {
 				System.out.println("user: "
-						+ getResultSet().getString("user_name").toString()
+						+ db.getResultSet().getString("user_name").toString()
 						+ "email: "
-						+ getResultSet().getString("email").toString());
+						+ db.getResultSet().getString("email").toString());
 			}
 		} catch (SQLException e) {
-			logSQLException("printAllUsers", e);
+			db.logSQLException("printAllUsers", e);
 		}
 
-		closeResultSetAndStatement();
+		db.closeResultSetAndStatement();
 	}
 
 	public boolean doesUserExist(String email) {
-		return isValuePresentInTable(email, Columns.USERS_email, Tables.USERS);
+		return db.isValuePresentInTable(email, Columns.USERS_email, Tables.USERS);
 	}
 
 	public String insertUser(String username, String password, String email) {
 		String result_message = "";
-		boolean username_ok = !isValuePresentInTable(username,
+		boolean username_ok = !db.isValuePresentInTable(username,
 				Columns.USERS_username, Tables.USERS);
-		boolean email_ok = isEmailValid(email);
+		boolean email_ok = db.isEmailValid(email);
 		if (username_ok && email_ok) {
 			password = Tools.hashString(password);
 			String statement = "insert into users values(default,\"" + email
 					+ "\",\"" + username + "\",\"" + password + "\");";
-			executeUpdate(statement);
+			db.executeUpdate(statement);
 			result_message = Messages.User_inserted.toString();
 		} else {
 			if (!username_ok) {
@@ -85,18 +86,18 @@ public class UsersDB extends DBConnection {
 		if (team.trim().isEmpty()) {
 			result = Messages.Value_Empty.toString();
 		} else {
-			if (isValuePresentInTable(team, Columns.TEAMS_name, Tables.TEAMS)) {
+			if (db.isValuePresentInTable(team, Columns.TEAMS_name, Tables.TEAMS)) {
 				result = Messages.Team_alreadyExists.toString();
 			} else {
 				String statement = "INSERT INTO TEAMS VALUES(default, \""
 						+ team + "\");";
-				int rows_affected = executeUpdate(statement);
+				int rows_affected = db.executeUpdate(statement);
 				if (rows_affected > 0) {
 					result = Messages.Team_inserted.toString();
 				} else {
 					result = Messages.Team_insertionFailed.toString();
 				}
-				closeResultSetAndStatement();
+				db.closeResultSetAndStatement();
 			}
 		}
 		return result;
@@ -107,10 +108,10 @@ public class UsersDB extends DBConnection {
 		if (team.trim().isEmpty()) {
 			result = Messages.Value_Empty.toString();
 		} else {
-			if (!isValuePresentInTable(team, Columns.TEAMS_name, Tables.TEAMS)) {
+			if (!db.isValuePresentInTable(team, Columns.TEAMS_name, Tables.TEAMS)) {
 				result = Messages.Team_notExists.toString();
 			} else {
-				int rows_affected = removeRow_byValue(team, Columns.TEAMS_name,
+				int rows_affected = db.removeRow_byValue(team, Columns.TEAMS_name,
 						Tables.TEAMS);
 				if (rows_affected > 0) {
 					result = Messages.Team_removed.toString();
@@ -183,19 +184,19 @@ public class UsersDB extends DBConnection {
 		Messages result = null;
 		result = teamAndUserExist(value, team, userColumn);
 		if (result.equals(Messages.OK)) {
-			int uid = getID(value, userColumn, Columns.USERS_Id, Tables.USERS);
-			int tid = getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
+			int uid = db.getID(value, userColumn, Columns.USERS_Id, Tables.USERS);
+			int tid = db.getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
 					Tables.TEAMS);
 			String statement = "DELETE FROM " + teamTable + " WHERE "
 					+ Columns.USERS_Id + "=" + uid + " AND " + Columns.TEAMS_Id
 					+ "=" + tid + ";";
-			int rows_affected = executeUpdate(statement);
+			int rows_affected = db.executeUpdate(statement);
 			if (rows_affected > 0) {
 				result = Messages.UserRemovalFromTeam_Succeeded;
 			} else {
 				result = Messages.UserRemovalFromTeam_Failed;
 			}
-			closeResultSetAndStatement();
+			db.closeResultSetAndStatement();
 		}
 
 		return result.toString();
@@ -204,10 +205,10 @@ public class UsersDB extends DBConnection {
 	private Messages teamAndUserExist(String user, String team,
 			Columns userColumn) {
 		Messages result = Messages.OK;
-		if (!isValuePresentInTable(user, userColumn, Tables.USERS)) {
+		if (!db.isValuePresentInTable(user, userColumn, Tables.USERS)) {
 			result = Messages.User_inexistend;
 		} else {
-			if (!isValuePresentInTable(team, Columns.TEAMS_name, Tables.TEAMS)) {
+			if (!db.isValuePresentInTable(team, Columns.TEAMS_name, Tables.TEAMS)) {
 				result = Messages.Team_notExists;
 			}
 		}
@@ -218,15 +219,15 @@ public class UsersDB extends DBConnection {
 		Messages result = null;
 		result = teamAndUserExist(user, team, user_column);
 		if (result.equals(Messages.OK)) {
-			int uid = getID(user, user_column, Columns.USERS_Id, Tables.USERS);
-			int tid = getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
+			int uid = db.getID(user, user_column, Columns.USERS_Id, Tables.USERS);
+			int tid = db.getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
 					Tables.TEAMS);
 			result = isUserInORLiderOfTeam(user, team, user_column,
 					Tables.TEAM_USERS);
 			if (result.equals(Messages.User_notMemberOFTheTeam)) {
 				String statement = "INSERT INTO " + Tables.TEAM_USERS
 						+ " VALUES(" + uid + "," + tid + ");";
-				int rows_affected = executeUpdate(statement);
+				int rows_affected = db.executeUpdate(statement);
 				if (rows_affected > 0) {
 					result = Messages.User_addedToTeam;
 				} else {
@@ -235,7 +236,7 @@ public class UsersDB extends DBConnection {
 			} else {
 				result = Messages.User_alreadyInTeam;
 			}
-			closeResultSetAndStatement();
+			db.closeResultSetAndStatement();
 		}
 		return result.toString();
 	}
@@ -245,17 +246,17 @@ public class UsersDB extends DBConnection {
 		Messages result = null;
 		result = teamAndUserExist(user, team, userColumn);
 		if (result.equals(Messages.OK)) {
-			int uid = getID(user, userColumn, Columns.USERS_Id, Tables.USERS);
-			int tid = getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
+			int uid = db.getID(user, userColumn, Columns.USERS_Id, Tables.USERS);
+			int tid = db.getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
 					Tables.TEAMS);
 			String statement = "SELECT * FROM " + tableLookingIn + " WHERE "
 					+ Columns.TEAMS_Id + "=" + tid + " AND " + Columns.USERS_Id
 					+ "=" + uid + ";";
-			executeStatement(statement);
+			db.executeStatement(statement);
 			try {
 				boolean lookingIn_TeamUsers = tableLookingIn
 						.equals(Tables.TEAM_USERS);
-				if (getResultSet().first()) {
+				if (db.getResultSet().first()) {
 					result = lookingIn_TeamUsers ? Messages.User_isMemberOfTheTeam
 							: Messages.User_isLiderOfTheTeam;
 				} else {
@@ -263,10 +264,10 @@ public class UsersDB extends DBConnection {
 							: Messages.User_notLiderOfTheTeam;
 				}
 			} catch (SQLException e) {
-				logSQLException("isUserInTeam", e);
+				db.logSQLException("isUserInTeam", e);
 				result = Messages.OperationFailed;
 			}
-			closeResultSetAndStatement();
+			db.closeResultSetAndStatement();
 		}
 		return result;
 	}
@@ -278,11 +279,11 @@ public class UsersDB extends DBConnection {
 			result = isUserInORLiderOfTeam(value, team, userColumn,
 					Tables.TEAM_LEADERS);
 			if (result.equals(Messages.User_notLiderOfTheTeam)) {
-				int tid = getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
+				int tid = db.getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
 						Tables.TEAMS);
-				int uid = getID(value, userColumn, Columns.USERS_Id,
+				int uid = db.getID(value, userColumn, Columns.USERS_Id,
 						Tables.USERS);
-				int affected_rows = insertRowIntoTable("" + uid + "," + tid,
+				int affected_rows = db.insertRowIntoTable("" + uid + "," + tid,
 						Tables.TEAM_LEADERS);
 				if (affected_rows > 0) {
 					result = Messages.TeamLider_Added;
@@ -298,7 +299,7 @@ public class UsersDB extends DBConnection {
 
 	private String removeUser(String user, Columns userColumn) {
 		String result = "";
-		int rows = removeRow_byValue(user, userColumn, Tables.USERS);
+		int rows = db.removeRow_byValue(user, userColumn, Tables.USERS);
 		if (rows > 0) {
 			result = Messages.User_deleted.toString();
 		} else {
@@ -311,12 +312,12 @@ public class UsersDB extends DBConnection {
 		String result = "";
 		String statement = "SELECT pass FROM " + Tables.USERS.toString()
 				+ " WHERE " + column + "=\"" + value + "\";";
-		executeStatement(statement);
+		db.executeStatement(statement);
 		try {
-			if (!getResultSet().first()) {
+			if (!db.getResultSet().first()) {
 				result = Messages.User_inexistend.toString();
 			} else {
-				String actual_password = getResultSet().getString(
+				String actual_password = db.getResultSet().getString(
 						Columns.USERS_password.toString()).toString();
 				password = Tools.hashString(password);
 				if (actual_password.equals(password)) {
@@ -330,9 +331,9 @@ public class UsersDB extends DBConnection {
 				}
 			}
 		} catch (SQLException e) {
-			logSQLException("check_user", e);
+			db.logSQLException("check_user", e);
 		}
-		closeResultSetAndStatement();
+		db.closeResultSetAndStatement();
 		return result;
 	}
 

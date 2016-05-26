@@ -10,13 +10,11 @@ import db.tools.Tables;
 
 public class FileSystemDB {
 	private DBConnection db = null;
-	private UsersDB udb = null;
 	private static FileSystemDB instance = null;
 	private static int nextAvailableFileID = 0;
 
 	private FileSystemDB() {
 		db = DBConnection.getInstance();
-		udb = UsersDB.getInstance();
 	}
 
 	public static FileSystemDB getInstance() {
@@ -169,7 +167,7 @@ public class FileSystemDB {
 		if (fileIsAlreadySaved) {
 			result = Messages.File_alreadySaved;
 		} else {
-			int uid = udb.getID(owner, Columns.USERS_email, Columns.USERS_Id,
+			int uid = db.getID(owner, Columns.USERS_email, Columns.USERS_Id,
 					Tables.USERS);
 			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
 					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\","
