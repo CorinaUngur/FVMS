@@ -314,9 +314,7 @@ public class UsersDB {
 				+ " WHERE " + column + "=\"" + value + "\";";
 		db.executeStatement(statement);
 		try {
-			if (!db.getResultSet().first()) {
-				result = Messages.User_inexistend.toString();
-			} else {
+			if ( db.getResultSet()!= null && db.getResultSet().first()) {
 				String actual_password = db.getResultSet().getString(
 						Columns.USERS_password.toString()).toString();
 				password = Tools.hashString(password);
@@ -329,6 +327,8 @@ public class UsersDB {
 									+ "' does not match actual password: "
 									+ actual_password);
 				}
+			} else {
+				result = Messages.User_inexistend.toString();
 			}
 		} catch (SQLException e) {
 			db.logSQLException("check_user", e);
