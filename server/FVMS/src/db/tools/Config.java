@@ -9,6 +9,8 @@ public enum Config {
 	NEWFILE_DEFAULTMESSAGE("new file default message"),
 	STATUS_AVAILABLE(1),
 	STATUS_MOVEDTOTRASH(2);
+	
+
 	private String string_value = null;
 	private int int_value;
 	Config(String string_value){

@@ -3,7 +3,12 @@ package db.tools;
 public enum Columns {
 
 	USERS_username("user_name"), USERS_password("pass"), USERS_email("email"), TEAMS_name(
-			"team_name"), USERS_Id("uid"), TEAMS_Id("tid"), Changes_Hash("hash"), Changes_Path("path"), Changes_ID("cid"), Changes_FID("fid"), Changes_Status("status"), Projects_ID("pid"), Projects_Name("name"), ProjectFiles_PID("pid"), ProjectFiles_CID("cid"), Projects_Path("relative_path");
+			"team_name"), USERS_Id("uid"), TEAMS_Id("tid"), Changes_Hash("hash"), Changes_Path(
+			"path"), Changes_ID("cid"), Changes_FID("fid"), Changes_Status(
+			"status"), Projects_ID("pid"), Projects_Name("name"), ProjectFiles_PID(
+			"pid"), ProjectFiles_CID("cid"), Projects_Path("relative_path"), FPermissions_user(
+			"uid"), FPermissions_file("fid"), FPermissions_rights("rights"), PPermissions_user(
+			"uid"), PPermissions_project("pid"), PPermissions_rights("rights");
 
 	public String column_name = "";
 
