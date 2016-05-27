@@ -147,7 +147,9 @@ public class FileSystem {
 		moveAllFiles(trashFolder, rootFolder);
 		return result;
 	}
-
+	public String getFileFolder(File source, int id) {
+		return source.getPath() + "/" + id;
+	}
 	private String moveAllFiles(File source, File dest) {
 		String result = "";
 		File trashFolder = new File(Settings.TRASH_FOLDER);
@@ -240,8 +242,6 @@ public class FileSystem {
 		return file_created ? file_path : null;
 	}
 
-	public String getFileFolder(File source, int id) {
-		return source.getPath() + "/" + id;
-	}
+
 
 }
