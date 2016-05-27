@@ -1,5 +1,7 @@
 package db;
 
+import init.InitializationClass;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,9 +10,12 @@ import db.tools.Messages;
 
 public class UsersOperation {
 	private UsersDB db;
-
+	private String username = "user";
+	private String email = "email@email.com";
+	private String password = "parola";
 	@Before
 	public void setUP() {
+		InitializationClass.initialization();
 		db = UsersDB.getInstance();
 		db.removeUserFromTeam_byEmail("email@email.com", "team");
 		db.removeUserFromTeam_byUsername("user", "team");
@@ -270,6 +275,14 @@ public class UsersOperation {
 		Assert.assertEquals(Messages.UserRemovalFromTeam_Succeeded.toString(), result);
 	}
 	
+	@Test 
+	public void checkUser_SQLInjection(){
+		db.insertUser(username, password, email);
+		String user = "user";
+		String result = db.checkUser_byUsername(user, "\" OR \"1\"=\"1");
+		
+		Assert.assertEquals(Messages.Login_failed.toString(), result);
+	}
 	// TODO tests for remove user from team
 	// TODO tests for remove lider from team
 	// TODO tests for SQL Injections
