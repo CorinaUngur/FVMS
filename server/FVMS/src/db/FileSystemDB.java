@@ -135,17 +135,19 @@ public class FileSystemDB {
 
 	public int moveFileToTrash(int id) {
 		int filesUpdated = 0;
-		String statement = "UPDATE " + Tables.CHANGES + " SET "
-				+ Columns.Changes_Status + "=" + Config.STATUS_MOVEDTOTRASH
-				+ " WHERE " + Columns.Changes_FID + "=" + id;
+		String statement = "UPDATE " + Tables.FILE_STATUS + " SET "
+				+ Columns.FileStatus_status + "=" + Config.STATUS_MOVEDTOTRASH
+				+ " WHERE " + Columns.FileStatus_FID + "=" + id;
 		filesUpdated = db.executeUpdate(statement);
 		return filesUpdated;
 	}
 
-	public int deleteTrashFiles() {
+	public int removeTrashFiles() {
 		int removedFiles = 0;
-		String statement = "DELETE FROM " + Tables.CHANGES + " WHERE "
-				+ Columns.Changes_Status + "=" + Config.STATUS_MOVEDTOTRASH;
+		String statement = "DELETE FROM " + Tables.CHANGES + " WHERE (SELECT "
+						+ Columns.FileStatus_status + " FROM " + Tables.FILE_STATUS
+						+ " WHERE " + Columns.FileStatus_FID + "=" + Tables.CHANGES
+						+ "." + Columns.Changes_FID + ") =" + Config.STATUS_MOVEDTOTRASH;
 		removedFiles = db.executeUpdate(statement);
 		return removedFiles;
 	}
@@ -193,8 +195,8 @@ public class FileSystemDB {
 
 	public int getStatus(int id) {
 		int status = -1;
-		String statement = "SELECT " + Columns.Changes_Status + " FROM "
-				+ Tables.CHANGES + " WHERE " + Columns.Changes_FID + "=" + id;
+		String statement = "SELECT " + Columns.FileStatus_status + " FROM "
+				+ Tables.FILE_STATUS + " WHERE " + Columns.FileStatus_FID + "=" + id;
 		db.executeStatement(statement);
 		try {
 			db.getResultSet().first();
@@ -235,7 +237,7 @@ public class FileSystemDB {
 			int uid = db.getID(owner, Columns.USERS_email, Columns.USERS_Id,
 					Tables.USERS);
 			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
-					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\",";
+					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\"";
 			int rows_affected = db.insertRowIntoTable(values, Tables.CHANGES);
 			if (rows_affected > 0) {
 				result = Messages.Change_added;
