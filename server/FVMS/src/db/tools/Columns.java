@@ -8,7 +8,8 @@ public enum Columns {
 			"status"), Projects_ID("pid"), Projects_Name("name"), ProjectFiles_PID(
 			"pid"), ProjectFiles_CID("cid"), Projects_Path("relative_path"), FPermissions_user(
 			"uid"), FPermissions_file("fid"), FPermissions_rights("rights"), PPermissions_user(
-			"uid"), PPermissions_project("pid"), PPermissions_rights("rights");
+			"uid"), PPermissions_project("pid"), PPermissions_rights("rights"), ProjectFiles_RPath(
+			"relative_path"), FileStatus_status("status"), FileStatus_FID("fid");
 
 	public String column_name = "";
 
