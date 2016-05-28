@@ -179,6 +179,9 @@ public class UsersDB {
 				Tables.TEAM_LEADERS).toString();
 	}
 
+	public int getUID(String userEmail) {
+		return db.getID(userEmail, Columns.USERS_email, Columns.USERS_Id, Tables.USERS);
+	}
 	private String removeUserOrLiderFromTeam(String value, String team,
 			Columns userColumn, Tables teamTable) {
 		Messages result = null;
@@ -336,5 +339,6 @@ public class UsersDB {
 		db.closeResultSetAndStatement();
 		return result;
 	}
+
 
 }

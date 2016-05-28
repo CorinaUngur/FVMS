@@ -102,4 +102,8 @@ public class ProjectsDB {
 		return rows_updated > 0 ? Messages.Project_pathUpdated.toString()
 				: Messages.Project_pathUpdatingFailed.toString();
 	}
+
+	public int getProjectID(String project_name) {
+		return db.getID(project_name, Columns.Projects_Name, Columns.Projects_ID, Tables.PROJECTS);
+	}
 }
