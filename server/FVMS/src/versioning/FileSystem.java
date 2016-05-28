@@ -11,36 +11,46 @@ import utils.Tools;
 import versioning.tools.Messages;
 import config.Settings;
 import db.FileSystemDB;
+import db.ProjectsDB;
 
 public class FileSystem {
-	FileSystemDB fsdb = FileSystemDB.getInstance();
+	private FileSystemDB fsdb = FileSystemDB.getInstance();
+	private ProjectsDB pdb = ProjectsDB.getInstance();
 
-	public String add_newFile(byte[] file_content, String file_name,
-			String email) {
-		Messages result = null;
+	public String add_newFile(byte[] file_content, String file_rpath,
+			String email, int pid) {
+		String result = null;
 		String file_path = null;
 		String hash = Tools.hashContent(file_content);
-		boolean fileExists = fsdb.isFileInDB(hash);
-		if (fileExists) {
-			result = Messages.FileAlreadyExists;
-		} else {
+		boolean fileExistsInFS = fsdb.isFileInDB(hash);
+		boolean fileExistsInProjects = fsdb.isFileInProject(hash, file_rpath);
+		if (!fileExistsInFS) {
 			int fid = fsdb.getNextAvailableID();
 			String folder_path = createFolder(fid);
 			if (folder_path != null) {
-				file_path = createFile(fid, file_name, file_content);
+				file_path = createFile(fid, file_rpath, file_content);
 				if (file_path != null) {
 					hash = Tools.hashContent(file_content);
 					String datetime = LocalDateTime.now().toString();
 					String dbResult = fsdb.addNewFile(fid, email, file_path,
 							hash, datetime);
 					Logger.logINFO(dbResult);
-					result = Messages.File_added;
+					pdb.addFile_toProject(pid, fid, file_rpath);
+					result = Messages.File_added.toString();
 				}
 			} else {
-				result = Messages.Folder_creationFailed;
+				result = Messages.Folder_creationFailed.toString();
+			}
+		} else {
+			if (!fileExistsInProjects) {
+				int fid = fsdb.getChangeID(hash);
+				pdb.addFile_toProject(pid, fid, file_rpath);
+				result = Messages.File_boundToProject.toString();
+			} else {
+				result = Messages.FileAlreadyExists.toString();
 			}
 		}
-		return result.toString();
+		return result;
 	}
 
 	public String addChange(int fid, String email, byte[] file_content,
@@ -83,6 +93,7 @@ public class FileSystem {
 		String path = getFileFolder(rootFolder, id);
 		File folder = new File(path);
 		result = moveFile(folder, rootFolder, trashFolder);
+		fsdb.moveFileToTrash(id);
 		return result;
 	}
 
@@ -109,7 +120,7 @@ public class FileSystem {
 		Tools.removeAllFiles(Settings.TRASH_FOLDER);
 		if ((new File(Settings.TRASH_FOLDER)).list().length == 0) {
 			result = Messages.Trash_empty;
-			fsdb.deleteTrashFiles();
+			fsdb.removeTrashFiles();
 		} else {
 			result = Messages.Trash_notEmpty;
 		}
@@ -147,9 +158,11 @@ public class FileSystem {
 		moveAllFiles(trashFolder, rootFolder);
 		return result;
 	}
+
 	public String getFileFolder(File source, int id) {
 		return source.getPath() + "/" + id;
 	}
+
 	private String moveAllFiles(File source, File dest) {
 		String result = "";
 		File trashFolder = new File(Settings.TRASH_FOLDER);
@@ -168,8 +181,8 @@ public class FileSystem {
 		if (folder.isDirectory()) {
 			dest.mkdir();
 			if (dest.exists()) {
-				File fileFolderInDest = new File(dest.getPath()
-						+ "/" + folder.getName());
+				File fileFolderInDest = new File(dest.getPath() + "/"
+						+ folder.getName());
 				fileFolderInDest.mkdir();
 				if (fileFolderInDest.exists()) {
 					for (String file_name : folder.list()) {
@@ -241,7 +254,5 @@ public class FileSystem {
 
 		return file_created ? file_path : null;
 	}
-
-
 
 }

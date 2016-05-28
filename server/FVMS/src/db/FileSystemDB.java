@@ -135,10 +135,17 @@ public class FileSystemDB {
 
 	public int moveFileToTrash(int id) {
 		int filesUpdated = 0;
-		String statement = "UPDATE " + Tables.FILE_STATUS + " SET "
+		String statement="";
+		if(db.isValuePresentInTable(id, Columns.FileStatus_FID, Tables.FILE_STATUS)){
+		statement = "UPDATE " + Tables.FILE_STATUS + " SET "
 				+ Columns.FileStatus_status + "=" + Config.STATUS_MOVEDTOTRASH
 				+ " WHERE " + Columns.FileStatus_FID + "=" + id;
+
 		filesUpdated = db.executeUpdate(statement);
+		} else {
+			String values = id + "," + Config.STATUS_MOVEDTOTRASH;
+			db.insertRowIntoTable(values, Tables.FILE_STATUS);
+		}
 		return filesUpdated;
 	}
 

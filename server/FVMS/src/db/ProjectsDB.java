@@ -61,7 +61,7 @@ public class ProjectsDB {
 	public String addFile_toProject(int pid, int cid, String relativePath) {
 		String result = null;
 		if (db.isValuePresentInTable(pid, Columns.ProjectFiles_PID,
-				Tables.PROJECT_FILES)) {
+				Tables.PROJECTS)) {
 			if (db.isValuePresentInTable(cid, Columns.Changes_ID,
 					Tables.CHANGES)) {
 				String values = pid + "," + cid + ",\"" + relativePath + "\"";
@@ -105,5 +105,13 @@ public class ProjectsDB {
 
 	public int getProjectID(String project_name) {
 		return db.getID(project_name, Columns.Projects_Name, Columns.Projects_ID, Tables.PROJECTS);
+	}
+	
+	public int removeAllFilesAndProjects(){
+		String statement = "DELETE FROM " + Tables.PROJECT_FILES;
+		int removedFiles = db.executeUpdate(statement);
+		statement = "DELETE FROM " + Tables.PROJECTS;
+		removedFiles += db.executeUpdate(statement);
+		return removedFiles;
 	}
 }

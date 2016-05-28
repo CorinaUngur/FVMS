@@ -12,35 +12,46 @@ import utils.Tools;
 import versioning.tools.Messages;
 import config.Settings;
 import db.FileSystemDB;
+import db.ProjectsDB;
 import db.UsersDB;
 import db.tools.Config;
 
 public class FilesOperation {
 	FileSystem fs = null;
 	FileSystemDB fsdb = null;
+	ProjectsDB pdb = null;
 	byte[] standard_content = null;
 	String userEmail = null;
 	String fileName = null;
 	String message = null;
+	int pid = 0;
 
 	@Before
 	public void setUp() {
 		InitializationClass.initialization();
 		fs = new FileSystem();
 		fsdb = FileSystemDB.getInstance();
+		pdb = ProjectsDB.getInstance();
+		
 		standard_content = "some content".getBytes();
 		userEmail = "files@test.user";
-		UsersDB.getInstance().insertUser("filesTestUser", "parola", userEmail);
 		fileName = "testFile.txt";
 		message = "test message";
+
+		pdb.removeAllFilesAndProjects();
 		fsdb.removeAllFiles();
 		fs.removeFilesFromRoot();
 		fs.emptyTrash();
+		
+		UsersDB.getInstance().insertUser("filesTestUser", "parola", userEmail);
+		int authorID = UsersDB.getInstance().getUID(userEmail);
+		pdb.addNewProject("test_project", authorID);
+		pid = pdb.getProjectID("test_project");
 	}
 
 	@Test
 	public void addNewFile_validInput() {
-		String result = fs.add_newFile(standard_content, fileName, userEmail);
+		String result = fs.add_newFile(standard_content, fileName, userEmail,pid);
 		Assert.assertEquals(Messages.File_added.toString(), result);
 
 		String hash = Tools.hashContent(standard_content);
@@ -54,10 +65,19 @@ public class FilesOperation {
 		String folder_name = "" + fsdb.getOriginalFileID(hash);
 		Assert.assertTrue(path.contains("/" + folder_name + "/"));
 	}
+	@Test
+	public void addNewFile_sameContentAsAnotherone(){
+		
+		fs.add_newFile(standard_content, fileName, userEmail, 1);
+		String result = fs.add_newFile(standard_content, fileName + "changed", userEmail,pid);
+		
+		Assert.assertEquals(Messages.File_boundToProject.toString(), result);
+
+	}
 
 	@Test
 	public void addChange_validInput() {
-		fs.add_newFile(standard_content, fileName, userEmail);
+		fs.add_newFile(standard_content, fileName, userEmail,pid);
 		int id = fsdb.getChangeID(Tools.hashContent(standard_content));
 		byte[] changed_content = "changed content".getBytes();
 		String result = fs.addChange(id, userEmail, changed_content, fileName,
@@ -72,7 +92,7 @@ public class FilesOperation {
 
 	@Test
 	public void moveToTrash_validFile() {
-		fs.add_newFile(standard_content, fileName, userEmail);
+		fs.add_newFile(standard_content, fileName, userEmail,pid);
 		int id = fsdb.getChangeID(Tools.hashContent(standard_content));
 		byte[] changed_content = "changed content".getBytes();
 		fs.addChange(id, userEmail, changed_content, fileName, "test change");
@@ -91,7 +111,7 @@ public class FilesOperation {
 	}
 	@Test
 	public void emptyTrash_2VersionsFile(){
-		fs.add_newFile(standard_content, fileName, userEmail);
+		fs.add_newFile(standard_content, fileName, userEmail,pid);
 		int id = fsdb.getChangeID(Tools.hashContent(standard_content));
 		byte[] changed_content = "changed content".getBytes();
 		fs.addChange(id, userEmail, changed_content, fileName, "test change");
@@ -102,7 +122,7 @@ public class FilesOperation {
 		File trashFolder = new File(Settings.TRASH_FOLDER);
 		Assert.assertTrue(trashFolder.list().length == 0);
 		
-		int remainedFilesInDB = fsdb.deleteTrashFiles();
+		int remainedFilesInDB = fsdb.removeTrashFiles();
 		Assert.assertEquals(0, remainedFilesInDB);
 	}
 }
