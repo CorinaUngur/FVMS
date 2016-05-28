@@ -26,8 +26,13 @@ public class FileSystemDB {
 
 	public String addNewFile(int fid, String email, String path, String hash,
 			String datetime) {
-		return insertChange(fid, fid, datetime, hash, email,
+		String result = insertChange(fid, fid, datetime, hash, email,
 				Config.NEWFILE_DEFAULTMESSAGE.toString(), path);
+		if (result.equals(Messages.File_added)) {
+			String values = fid + "," + Config.STATUS_AVAILABLE;
+			db.insertRowIntoTable(values, Tables.FILE_STATUS);
+		}
+		return result;
 	}
 
 	public int getNextAvailableID() {
@@ -117,6 +122,17 @@ public class FileSystemDB {
 		return rows_deleted;
 	}
 
+	public int removeFiles_ExceptTrash() {
+		int rows_deleted = 0;
+		String statement = "DELETE FROM " + Tables.CHANGES + " WHERE (SELECT "
+				+ Columns.FileStatus_status + " FROM " + Tables.FILE_STATUS
+				+ " WHERE " + Columns.FileStatus_FID + "=" + Tables.CHANGES
+				+ "." + Columns.Changes_FID + ") !="
+				+ Config.STATUS_MOVEDTOTRASH;
+		rows_deleted = db.executeUpdate(statement);
+		return rows_deleted;
+	}
+
 	public int moveFileToTrash(int id) {
 		int filesUpdated = 0;
 		String statement = "UPDATE " + Tables.CHANGES + " SET "
@@ -160,26 +176,19 @@ public class FileSystemDB {
 		return result;
 	}
 
-	private String insertChange(int cid, int id, String datetime, String hash,
-			String owner, String message, String path) {
-		Messages result = null;
-		boolean fileIsAlreadySaved = isFileInDB(hash);
-		if (fileIsAlreadySaved) {
-			result = Messages.File_alreadySaved;
-		} else {
-			int uid = db.getID(owner, Columns.USERS_email, Columns.USERS_Id,
-					Tables.USERS);
-			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
-					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\","
-					+ Config.STATUS_AVAILABLE;
-			int rows_affected = db.insertRowIntoTable(values, Tables.CHANGES);
-			if (rows_affected > 0) {
-				result = Messages.Change_added;
-			} else {
-				result = Messages.Change_addingFailed;
+	public boolean isFileInProject(String hash, String file_rpath) {
+		boolean fileExists = false;
+		if (db.isValuePresentInTable(file_rpath, Columns.ProjectFiles_RPath,
+				Tables.PROJECT_FILES)) {
+			int idC = db.getID(hash, Columns.Changes_Hash, Columns.Changes_ID,
+					Tables.CHANGES);
+			int idPF = db.getID(file_rpath, Columns.ProjectFiles_RPath,
+					Columns.ProjectFiles_CID, Tables.PROJECT_FILES);
+			if (idC == idPF) {
+				fileExists = true;
 			}
 		}
-		return result.toString();
+		return fileExists;
 	}
 
 	public int getStatus(int id) {
@@ -214,6 +223,27 @@ public class FileSystemDB {
 
 		db.closeResultSetAndStatement();
 		return result;
+	}
+
+	private String insertChange(int cid, int id, String datetime, String hash,
+			String owner, String message, String path) {
+		Messages result = null;
+		boolean fileIsAlreadySaved = isFileInDB(hash);
+		if (fileIsAlreadySaved) {
+			result = Messages.File_alreadySaved;
+		} else {
+			int uid = db.getID(owner, Columns.USERS_email, Columns.USERS_Id,
+					Tables.USERS);
+			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
+					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\",";
+			int rows_affected = db.insertRowIntoTable(values, Tables.CHANGES);
+			if (rows_affected > 0) {
+				result = Messages.Change_added;
+			} else {
+				result = Messages.Change_addingFailed;
+			}
+		}
+		return result.toString();
 	}
 
 }
