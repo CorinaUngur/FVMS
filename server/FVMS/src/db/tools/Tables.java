@@ -10,7 +10,6 @@ public enum Tables {
     PROJECTS, 
     PROJECT_FILES, 
     PROJECT_PERMISSIONS, 
-    FILE_PERMISSIONS, 
     FILE_STATUS;
 	
 	

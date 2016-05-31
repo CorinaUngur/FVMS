@@ -1,9 +1,10 @@
 package db.tools;
 
 public enum Permissions {
-	PERMISSION_READ("R"),
-	PERMISSION_EDIT("W"),
-	PERMISSION_PERMIT("P");
+	READ("R"),
+	EDIT("W"),
+	PERMIT("P"), 
+	ALL("RWP");
 	
 	private String val;
 	

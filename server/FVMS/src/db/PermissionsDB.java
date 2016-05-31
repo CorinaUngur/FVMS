@@ -13,7 +13,7 @@ public class PermissionsDB {
 	public static PermissionsDB instance = null;
 
 	private PermissionsDB() {
-		db = new DBConnection();
+		db = DBConnection.getInstance();
 	}
 
 	public static PermissionsDB getInstance() {
@@ -23,50 +23,37 @@ public class PermissionsDB {
 		return instance;
 	}
 
-	public String setPermission_onFile(int uid, int fid, Permissions permission) {
-		return setPermission(uid, fid, permission, Columns.FPermissions_user,
-				Columns.FPermissions_file, Columns.FPermissions_rights,
-				Tables.FILE_PERMISSIONS);
-	}
-
-	public String setPermission_onProject(int uid, int fid,
+	public String setPermission_onProject(int uid, int pid,
 			Permissions permission) {
-		return setPermission(uid, fid, permission, Columns.PPermissions_user,
-				Columns.PPermissions_project, Columns.PPermissions_rights,
-				Tables.PROJECT_PERMISSIONS);
-	}
-
-	public String unsetPermission_onFile(int uid, int fid,
-			Permissions permission) {
-		return unsetPermission(uid, fid, permission, Columns.FPermissions_user,
-				Columns.FPermissions_file, Columns.FPermissions_rights,
-				Tables.FILE_PERMISSIONS);
+		if (hasPermission_onProject(uid, pid, Permissions.READ)) {
+			return updatePermission(uid, pid, permission,
+					Columns.PPermissions_user, Columns.PPermissions_project,
+					Columns.PPermissions_rights, Tables.PROJECT_PERMISSIONS,
+					true);
+		} else {
+			String values = uid + "," + pid + ",\"" + permission + "\"";
+			db.insertRowIntoTable(values, Tables.PROJECT_PERMISSIONS);
+			return Messages.Permission_set.toString();
+		}
 	}
 
 	public String unsetPermission_onProject(int uid, int fid,
 			Permissions permission) {
-		return unsetPermission(uid, fid, permission, Columns.PPermissions_user,
-				Columns.PPermissions_project, Columns.PPermissions_rights,
-				Tables.PROJECT_PERMISSIONS);
-	}
-	public boolean hasPermission_onFile(int uid, int fid, Permissions permission){
-		String permissions = getPermission(uid, fid, Columns.FPermissions_user, Columns.FPermissions_file, Columns.FPermissions_rights, Tables.FILE_PERMISSIONS);
-		return permissions.contains(permissions.toString());
-	}
-	public boolean hasPermission_onProject(int uid, int pid, Permissions permission){
-		String permissions = getPermission(uid, pid, Columns.PPermissions_user, Columns.PPermissions_project, Columns.PPermissions_rights, Tables.PROJECT_PERMISSIONS);
-		return permissions.contains(permissions.toString());
-	}
-	private String unsetPermission(int uid, int fid, Permissions permission,
-			Columns uidCol, Columns fidCol, Columns rightCol, Tables table) {
-		return updatePermission(uid, fid, permission, uidCol, fidCol, rightCol,
-				table, false);
+		return updatePermission(uid, fid, permission,
+				Columns.PPermissions_user, Columns.PPermissions_project,
+				Columns.PPermissions_rights, Tables.PROJECT_PERMISSIONS, false);
 	}
 
-	private String setPermission(int uid, int fid, Permissions permission,
-			Columns uidCol, Columns fidCol, Columns rightCol, Tables table) {
-		return updatePermission(uid, fid, permission, uidCol, fidCol, rightCol,
-				table, true);
+	public boolean hasPermission_onProject(int uid, int pid,
+			Permissions permission) {
+		String permissions = getPermission(uid, pid, Columns.PPermissions_user,
+				Columns.PPermissions_project, Columns.PPermissions_rights,
+				Tables.PROJECT_PERMISSIONS);
+		if (permissions.isEmpty()) {
+			return false;
+		} else {
+			return permissions.contains(permissions.toString());
+		}
 	}
 
 	private String getPermission(int uid, int fid, Columns uidCol,
@@ -78,7 +65,7 @@ public class PermissionsDB {
 		try {
 			if (db.getResultSet().first()) {
 				permission = db.getResultSet().getString(1);
-				db.closeResultSetAndStatement();
+				db.closeStatementsAndResultSets();
 			}
 		} catch (SQLException e) {
 			Logger.logERROR(e);
@@ -93,9 +80,10 @@ public class PermissionsDB {
 		String permissions = getPermission(uid, fid, uidCol, fidCol, rightCol,
 				table);
 		String newPermission = getNewPermission(permissions, permission, flag);
-		String statement = "UPDATE " + table + " SET " + rightCol + "="
-				+ newPermission + " WHERE " + uidCol + "=" + uid + " AND "
+		String statement = "UPDATE " + table + " SET " + rightCol + "=\""
+				+ newPermission + "\" WHERE " + uidCol + "=" + uid + " AND "
 				+ fidCol + "=" + fid;
+
 		int rows_affected = db.executeUpdate(statement);
 		if (rows_affected > 0) {
 			result = Messages.Permission_set.toString();
@@ -107,7 +95,12 @@ public class PermissionsDB {
 
 	private String getNewPermission(String oldPermission, Permissions toAdd,
 			boolean flag) {
-		return flag ? oldPermission.concat(oldPermission.toString())
-				: oldPermission.replace(toAdd.toString(), "");
+		String perm = "";
+		if (flag) {
+			perm = oldPermission.concat(toAdd.toString());
+		} else {
+			perm = oldPermission.replace(toAdd.toString(), "");
+		}
+		return perm;
 	}
 }

@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import utils.Logger;
 import config.Settings;
@@ -15,6 +16,8 @@ public class DBConnection {
 	private Connection conn;
 	private Statement stmt;
 	private ResultSet rs;
+	private ArrayList<Statement> stmts;
+	private ArrayList<ResultSet> rss;
 
 	private static DBConnection instance = null;
 
@@ -24,13 +27,14 @@ public class DBConnection {
 		return instance;
 	}
 
-	protected DBConnection() {
+	private DBConnection() {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
 			conn = DriverManager.getConnection("jdbc:mysql://"
 					+ Settings.DB_URL + "/fvms?" + "user=" + Settings.DB_USER
 					+ "&password=" + Settings.DB_PASSWORD);
-
+			rss = new ArrayList<ResultSet>();
+			stmts = new ArrayList<Statement>();
 		} catch (SQLException ex) {
 			logSQLException("DBConnection", ex);
 		} catch (Exception ex) {
@@ -47,7 +51,7 @@ public class DBConnection {
 			if (rows_removed > 0) {
 				Logger.logINFO(rows_removed + " rows successfully deleted");
 			}
-			closeResultSetAndStatement();
+			closeStatementsAndResultSets();
 		}
 		return rows_removed;
 	}
@@ -57,25 +61,31 @@ public class DBConnection {
 				+ method_name);
 	}
 
-	public void closeResultSetAndStatement() {
-		if (rs != null) {
-			try {
-				rs.close();
-			} catch (SQLException sqlEx) {
-				logSQLException("closeResultSetAndStatement", sqlEx);
-			}
+	public void closeStatementsAndResultSets() {
+		for (ResultSet rs : rss) {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException sqlEx) {
+					logSQLException("closeResultSetAndStatement", sqlEx);
+				}
 
-			rs = null;
-		}
-		if (stmt != null) {
-			try {
-				stmt.close();
-			} catch (SQLException sqlEx) {
-				logSQLException("closeResultSetAndStatement", sqlEx);
+				rs = null;
 			}
-
-			stmt = null;
 		}
+		rss.clear();
+		for (Statement stmt : stmts) {
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException sqlEx) {
+					logSQLException("closeResultSetAndStatement", sqlEx);
+				}
+
+				stmt = null;
+			}
+		}
+		stmts.clear();
 	}
 
 	public boolean isEmailValid(String email) {
@@ -105,67 +115,31 @@ public class DBConnection {
 		return executeValuePresentStatement(statement);
 	}
 
-	public boolean stmtAndRs_NullOrClosed(String statement) {
-		boolean readyToRun = false;
+	public ResultSet executeStatement(String statement) {
 		try {
-			String notClosedMessage = "' I found out that you did not closed ResultSet and Statement after last use. Close statement and result set after each use!!";
-			;
-			if (stmt != null) {
-				if (!stmt.isClosed()) {
-					Logger.logWARNING("While trying to execute statement: '" + statement
-							+ notClosedMessage);
-					readyToRun = true;
-				}
-			} else {
-				readyToRun = true;
+			stmt = conn.createStatement();
+			if (stmt.execute(statement)) {
+				rs = stmt.getResultSet();
 			}
-			if (rs != null) {
-				if (!rs.isClosed()) {
-					Logger.logWARNING("Statement " + notClosedMessage);
-					readyToRun &= true;
-				}
-			} else {
-				readyToRun = true;
-			}
-		} catch (SQLException e) {
-			logSQLException("stmt_readyToRun", e);
-		}
-		return readyToRun;
-	}
-
-	public boolean executeStatement(String statement) {
-		boolean statementRun = false;
-		boolean readyToRun = stmtAndRs_NullOrClosed(statement);
-		if (readyToRun) {
-			try {
-				stmt = conn.createStatement();
-				if (stmt.execute(statement)) {
-					rs = stmt.getResultSet();
-					statementRun = true;
-				}
-			} catch (SQLException ex) {
-				logSQLException("executeStatement: " + statement, ex);
-			}
+		} catch (SQLException ex) {
+			logSQLException("executeStatement: " + statement, ex);
 		}
 
-		return statementRun;
+		return rs;
 	}
 
 	public int executeUpdate(String statement) {
 		rs = null;
 		int rowsUpdated = 0;
-		boolean readyToRun = stmtAndRs_NullOrClosed(statement);
-		if (readyToRun) {
-			try {
-				stmt = conn.createStatement();
-				rowsUpdated = stmt.executeUpdate(statement);
-				if (rowsUpdated > 0) {
-					rs = stmt.getResultSet();
-				}
-				closeResultSetAndStatement();
-			} catch (SQLException ex) {
-				logSQLException("executeUpdate: " + statement, ex);
+		try {
+			stmt = conn.createStatement();
+			rowsUpdated = stmt.executeUpdate(statement);
+			if (rowsUpdated > 0) {
+				rs = stmt.getResultSet();
 			}
+			closeStatementsAndResultSets();
+		} catch (SQLException ex) {
+			logSQLException("executeUpdate: " + statement, ex);
 		}
 		return rowsUpdated;
 	}
@@ -174,22 +148,20 @@ public class DBConnection {
 			Tables table) {
 		String statement = "SELECT " + idColumn.toString() + " FROM " + table
 				+ " WHERE " + valueColumn + "=\"" + value + "\";";
-		int id = -1;
-		try {
-			executeStatement(statement);
-			rs.first();
-			id = rs.getInt(1);
-			closeResultSetAndStatement();
-		} catch (SQLException e) {
-			logSQLException("getID", e);
-		}
-		return id;
+		return getID_exStatement(statement);
 	}
+	public int getID(int value, Columns valueColumn, Columns idColumn,
+			Tables table) {
+		String statement = "SELECT " + idColumn.toString() + " FROM " + table
+				+ " WHERE " + valueColumn + "=" + value + ";";
+		return getID_exStatement(statement);
+	}
+	
 
 	public int insertRowIntoTable(String values, Tables table) {
 		String statement = "INSERT INTO " + table + " VALUES(" + values + ");";
 		int rows_affected = executeUpdate(statement);
-		closeResultSetAndStatement();
+		closeStatementsAndResultSets();
 		return rows_affected;
 	}
 
@@ -205,7 +177,7 @@ public class DBConnection {
 		} catch (SQLException e) {
 			logSQLException("isValuePresentInTable:" + statement, e);
 		}
-		closeResultSetAndStatement();
+		closeStatementsAndResultSets();
 		return result;
 	}
 
@@ -218,15 +190,36 @@ public class DBConnection {
 			if (rows_removed > 0) {
 				Logger.logINFO(rows_removed + " rows successfully deleted");
 			}
-			closeResultSetAndStatement();
+			closeStatementsAndResultSets();
 		}
 		return rows_removed;
 	}
-	public int setStringValue_byID(String newValue, Columns valColumn, int id, Columns idColumn, Tables table){
-		int rowsUpdated=0;
-		String statement = "UPDATE " + table + " SET " + valColumn + "=\"" + newValue +"\" WHERE " + idColumn + "=" + id;
+
+	public int setStringValue_byID(String newValue, Columns valColumn, int id,
+			Columns idColumn, Tables table) {
+		int rowsUpdated = 0;
+		String statement = "UPDATE " + table + " SET " + valColumn + "=\""
+				+ newValue + "\" WHERE " + idColumn + "=" + id;
 		rowsUpdated = executeUpdate(statement);
 		return rowsUpdated;
 	}
 
+	
+	private int getID_exStatement(String statement){
+		int id = -1;
+		try {
+			executeStatement(statement);
+			rs.first();
+			id = rs.getInt(1);
+			closeStatementsAndResultSets();
+		} catch (SQLException e) {
+			logSQLException("getID", e);
+		}
+		return id;
+	}
+
+	public void removeAllFromTable(Tables table) {
+		String statement = "DELETE FROM " + table;
+		executeUpdate(statement);
+	}
 }

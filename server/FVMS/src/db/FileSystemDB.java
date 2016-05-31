@@ -1,5 +1,6 @@
 package db;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import utils.Logger;
@@ -24,14 +25,10 @@ public class FileSystemDB {
 		return instance;
 	}
 
-	public String addNewFile(int fid, String email, String path, String hash,
+	public String addNewFile(int fid, String userName, String path, String hash,
 			String datetime) {
-		String result = insertChange(fid, fid, datetime, hash, email,
+		String result = insertChange(fid, fid, datetime, hash, userName,
 				Config.NEWFILE_DEFAULTMESSAGE.toString(), path);
-		if (result.equals(Messages.File_added)) {
-			String values = fid + "," + Config.STATUS_AVAILABLE;
-			db.insertRowIntoTable(values, Tables.FILE_STATUS);
-		}
 		return result;
 	}
 
@@ -39,8 +36,8 @@ public class FileSystemDB {
 		if (nextAvailableFileID <= 0) {
 			String statement = "SELECT MAX(" + Columns.Changes_ID + ") FROM "
 					+ Tables.CHANGES;
-			boolean weHaveResults = db.executeStatement(statement);
-			if (weHaveResults) {
+			ResultSet rs = db.executeStatement(statement);
+			if (rs != null) {
 				try {
 					if (db.getResultSet().first()) {
 						nextAvailableFileID = db.getResultSet().getInt(1) + 1;
@@ -48,7 +45,7 @@ public class FileSystemDB {
 				} catch (SQLException e) {
 					db.logSQLException("getNextAvailableID", e);
 				}
-				db.closeResultSetAndStatement();
+				db.closeStatementsAndResultSets();
 			} else {
 				Logger.logWARNING("Last CID could not be read.");
 			}
@@ -167,7 +164,7 @@ public class FileSystemDB {
 				+ Tables.CHANGES + " WHERE " + Columns.Changes_FID + "=\"" + id
 				+ "\";";
 		int filesNo = db.executeUpdate(statement);
-		db.closeResultSetAndStatement();
+		db.closeStatementsAndResultSets();
 		String[] result = null;
 		if (filesNo > 0) {
 			result = new String[filesNo];
@@ -230,7 +227,7 @@ public class FileSystemDB {
 			db.logSQLException("getPath", e);
 		}
 
-		db.closeResultSetAndStatement();
+		db.closeStatementsAndResultSets();
 		return result;
 	}
 
@@ -241,10 +238,8 @@ public class FileSystemDB {
 		if (fileIsAlreadySaved) {
 			result = Messages.File_alreadySaved;
 		} else {
-			int uid = db.getID(owner, Columns.USERS_email, Columns.USERS_Id,
-					Tables.USERS);
 			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
-					+ "\"," + uid + ",\"" + message + "\",\"" + path + "\"";
+					+ "\",\"" + owner + "\",\"" + message + "\",\"" + path + "\"";
 			int rows_affected = db.insertRowIntoTable(values, Tables.CHANGES);
 			if (rows_affected > 0) {
 				result = Messages.Change_added;

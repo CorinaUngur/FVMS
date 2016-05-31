@@ -23,7 +23,10 @@ public class Settings {
 		}
 		DB_URL = properties.getProperty("db_url");
 		DB_NAME = properties.getProperty("db_name");
-		DB_USER=properties.getProperty("db_user");;
+		DB_USER=properties.getProperty("db_user");
+		DB_ADMIN_USERNMANE=properties.getProperty("db_admin_user");
+		DB_ADMIN_EMAIL=properties.getProperty("db_admin_email");
+		
 		DB_PASSWORD=properties.getProperty("db_password");
 		TRASH_ENABLED = Boolean.parseBoolean(properties.getProperty("trash_enabled"));
 		TRASH_EXPTIME = Integer.parseInt(properties.getProperty("trash_expirationTime"));
@@ -40,6 +43,8 @@ public class Settings {
 	public static String DB_NAME="fvms";
 	public static String DB_USER="root";
 	public static String DB_PASSWORD="parola";
+	public static String DB_ADMIN_USERNMANE="default";
+	public static String DB_ADMIN_EMAIL="default";
 	public static boolean TRASH_ENABLED = true;
 	public static int TRASH_EXPTIME = 10;
 	public static int TRASH_MAXSIZE = 1024;

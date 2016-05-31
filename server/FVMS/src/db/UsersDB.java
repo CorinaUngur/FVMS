@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import utils.Logger;
 import utils.Tools;
+import config.Settings;
 import db.tools.Columns;
 import db.tools.Messages;
 import db.tools.Tables;
@@ -36,11 +37,17 @@ public class UsersDB {
 			db.logSQLException("printAllUsers", e);
 		}
 
-		db.closeResultSetAndStatement();
+		db.closeStatementsAndResultSets();
 	}
 
-	public boolean doesUserExist(String email) {
-		return db.isValuePresentInTable(email, Columns.USERS_email, Tables.USERS);
+	public boolean doesEmailExist(String email) {
+		return db.isValuePresentInTable(email, Columns.USERS_email,
+				Tables.USERS);
+	}
+
+	public boolean doesUsernameExist(String username) {
+		return db.isValuePresentInTable(username, Columns.USERS_username,
+				Tables.USERS);
 	}
 
 	public String insertUser(String username, String password, String email) {
@@ -97,7 +104,7 @@ public class UsersDB {
 				} else {
 					result = Messages.Team_insertionFailed.toString();
 				}
-				db.closeResultSetAndStatement();
+				db.closeStatementsAndResultSets();
 			}
 		}
 		return result;
@@ -108,11 +115,12 @@ public class UsersDB {
 		if (team.trim().isEmpty()) {
 			result = Messages.Value_Empty.toString();
 		} else {
-			if (!db.isValuePresentInTable(team, Columns.TEAMS_name, Tables.TEAMS)) {
+			if (!db.isValuePresentInTable(team, Columns.TEAMS_name,
+					Tables.TEAMS)) {
 				result = Messages.Team_notExists.toString();
 			} else {
-				int rows_affected = db.removeRow_byValue(team, Columns.TEAMS_name,
-						Tables.TEAMS);
+				int rows_affected = db.removeRow_byValue(team,
+						Columns.TEAMS_name, Tables.TEAMS);
 				if (rows_affected > 0) {
 					result = Messages.Team_removed.toString();
 				} else {
@@ -179,15 +187,23 @@ public class UsersDB {
 				Tables.TEAM_LEADERS).toString();
 	}
 
-	public int getUID(String userEmail) {
-		return db.getID(userEmail, Columns.USERS_email, Columns.USERS_Id, Tables.USERS);
+	public int getUID_byEmail(String userEmail) {
+		return db.getID(userEmail, Columns.USERS_email, Columns.USERS_Id,
+				Tables.USERS);
 	}
+
+	public int getUID_byUsername(String username) {
+		return db.getID(username, Columns.USERS_username, Columns.USERS_Id,
+				Tables.USERS);
+	}
+
 	private String removeUserOrLiderFromTeam(String value, String team,
 			Columns userColumn, Tables teamTable) {
 		Messages result = null;
 		result = teamAndUserExist(value, team, userColumn);
 		if (result.equals(Messages.OK)) {
-			int uid = db.getID(value, userColumn, Columns.USERS_Id, Tables.USERS);
+			int uid = db.getID(value, userColumn, Columns.USERS_Id,
+					Tables.USERS);
 			int tid = db.getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
 					Tables.TEAMS);
 			String statement = "DELETE FROM " + teamTable + " WHERE "
@@ -199,7 +215,7 @@ public class UsersDB {
 			} else {
 				result = Messages.UserRemovalFromTeam_Failed;
 			}
-			db.closeResultSetAndStatement();
+			db.closeStatementsAndResultSets();
 		}
 
 		return result.toString();
@@ -211,7 +227,8 @@ public class UsersDB {
 		if (!db.isValuePresentInTable(user, userColumn, Tables.USERS)) {
 			result = Messages.User_inexistend;
 		} else {
-			if (!db.isValuePresentInTable(team, Columns.TEAMS_name, Tables.TEAMS)) {
+			if (!db.isValuePresentInTable(team, Columns.TEAMS_name,
+					Tables.TEAMS)) {
 				result = Messages.Team_notExists;
 			}
 		}
@@ -222,7 +239,8 @@ public class UsersDB {
 		Messages result = null;
 		result = teamAndUserExist(user, team, user_column);
 		if (result.equals(Messages.OK)) {
-			int uid = db.getID(user, user_column, Columns.USERS_Id, Tables.USERS);
+			int uid = db.getID(user, user_column, Columns.USERS_Id,
+					Tables.USERS);
 			int tid = db.getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
 					Tables.TEAMS);
 			result = isUserInORLiderOfTeam(user, team, user_column,
@@ -239,7 +257,7 @@ public class UsersDB {
 			} else {
 				result = Messages.User_alreadyInTeam;
 			}
-			db.closeResultSetAndStatement();
+			db.closeStatementsAndResultSets();
 		}
 		return result.toString();
 	}
@@ -249,7 +267,8 @@ public class UsersDB {
 		Messages result = null;
 		result = teamAndUserExist(user, team, userColumn);
 		if (result.equals(Messages.OK)) {
-			int uid = db.getID(user, userColumn, Columns.USERS_Id, Tables.USERS);
+			int uid = db
+					.getID(user, userColumn, Columns.USERS_Id, Tables.USERS);
 			int tid = db.getID(team, Columns.TEAMS_name, Columns.TEAMS_Id,
 					Tables.TEAMS);
 			String statement = "SELECT * FROM " + tableLookingIn + " WHERE "
@@ -270,7 +289,7 @@ public class UsersDB {
 				db.logSQLException("isUserInTeam", e);
 				result = Messages.OperationFailed;
 			}
-			db.closeResultSetAndStatement();
+			db.closeStatementsAndResultSets();
 		}
 		return result;
 	}
@@ -302,11 +321,15 @@ public class UsersDB {
 
 	private String removeUser(String user, Columns userColumn) {
 		String result = "";
-		int rows = db.removeRow_byValue(user, userColumn, Tables.USERS);
-		if (rows > 0) {
-			result = Messages.User_deleted.toString();
+		if (user.equals(Settings.DB_ADMIN_USERNMANE)) {
+			Logger.logINFO("Admin cannot be removed from database");
 		} else {
-			result = Messages.User_inexistend.toString();
+			int rows = db.removeRow_byValue(user, userColumn, Tables.USERS);
+			if (rows > 0) {
+				result = Messages.User_deleted.toString();
+			} else {
+				result = Messages.User_inexistend.toString();
+			}
 		}
 		return result;
 	}
@@ -317,18 +340,18 @@ public class UsersDB {
 				+ " WHERE " + column + "=\"" + value + "\";";
 		db.executeStatement(statement);
 		try {
-			if ( db.getResultSet()!= null && db.getResultSet().first()) {
-				String actual_password = db.getResultSet().getString(
-						Columns.USERS_password.toString()).toString();
+			if (db.getResultSet() != null && db.getResultSet().first()) {
+				String actual_password = db.getResultSet()
+						.getString(Columns.USERS_password.toString())
+						.toString();
 				password = Tools.hashString(password);
 				if (actual_password.equals(password)) {
 					result = Messages.Login_succesfull.toString();
 				} else {
 					result = Messages.Login_failed.toString();
-					Logger.logINFO(
-							"Login failed: '" + password
-									+ "' does not match actual password: "
-									+ actual_password);
+					Logger.logINFO("Login failed: '" + password
+							+ "' does not match actual password: "
+							+ actual_password);
 				}
 			} else {
 				result = Messages.User_inexistend.toString();
@@ -336,9 +359,8 @@ public class UsersDB {
 		} catch (SQLException e) {
 			db.logSQLException("check_user", e);
 		}
-		db.closeResultSetAndStatement();
+		db.closeStatementsAndResultSets();
 		return result;
 	}
-
 
 }

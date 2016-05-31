@@ -3,6 +3,7 @@ import java.io.File;
 
 import utils.Logger;
 import config.Settings;
+import db.UsersDB;
 
 public class InitializationClass {
 	public static void initialization() {
@@ -10,6 +11,12 @@ public class InitializationClass {
 		Logger.initializeLogger();
 		Settings.loadProperties("../config.properties");
 		createRootAndTrashFolders();
+		initializeDatabase();
+		
+	}
+
+	private static void initializeDatabase() {
+		UsersDB.getInstance().insertUser(Settings.DB_ADMIN_USERNMANE, "default", Settings.DB_ADMIN_EMAIL);
 		
 	}
 

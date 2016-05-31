@@ -18,30 +18,27 @@ public class FileSystem {
 	private ProjectsDB pdb = ProjectsDB.getInstance();
 
 	public String add_newFile(byte[] file_content, String file_rpath,
-			String email, int pid) {
+			String owner, int pid) {
 		String result = null;
 		String file_path = null;
 		String hash = Tools.hashContent(file_content);
 		boolean fileExistsInFS = fsdb.isFileInDB(hash);
-		boolean fileExistsInProjects = fsdb.isFileInProject(hash, file_rpath);
 		if (!fileExistsInFS) {
 			int fid = fsdb.getNextAvailableID();
 			String folder_path = createFolder(fid);
 			if (folder_path != null) {
 				file_path = createFile(fid, file_rpath, file_content);
 				if (file_path != null) {
-					hash = Tools.hashContent(file_content);
-					String datetime = LocalDateTime.now().toString();
-					String dbResult = fsdb.addNewFile(fid, email, file_path,
-							hash, datetime);
-					Logger.logINFO(dbResult);
-					pdb.addFile_toProject(pid, fid, file_rpath);
-					result = Messages.File_added.toString();
+					result = addnewFile_toDB(file_content, file_rpath, owner,
+							pid, file_path, fid);
 				}
 			} else {
 				result = Messages.Folder_creationFailed.toString();
 			}
 		} else {
+
+			boolean fileExistsInProjects = fsdb.isFileInProject(hash,
+					file_rpath);
 			if (!fileExistsInProjects) {
 				int fid = fsdb.getChangeID(hash);
 				pdb.addFile_toProject(pid, fid, file_rpath);
@@ -53,14 +50,28 @@ public class FileSystem {
 		return result;
 	}
 
-	public String addChange(int fid, String email, byte[] file_content,
+	private String addnewFile_toDB(byte[] file_content, String file_rpath,
+			String owner, int pid, String file_path, int fid) {
+		String result;
+		String hash = Tools.hashContent(file_content);
+		String datetime = LocalDateTime.now().toString();
+		String dbResult = fsdb
+				.addNewFile(fid, owner, file_path, hash, datetime);
+		Logger.logINFO(dbResult);
+		Logger.logINFO(pdb.addFile_toProject(pid, fid, file_rpath));
+		result = Messages.File_added.toString();
+		Logger.logINFO(result);
+		return result;
+	}
+
+	public String addChange(int fid, String owner, byte[] file_content,
 			String file_name, String message) {
 		Messages result = null;
 		String file_path = createFile(fid, file_name, file_content);
 		if (file_path != null) {
 			String hash = Tools.hashContent(file_content);
 			String datetime = LocalDateTime.now().toString();
-			String dbResult = fsdb.addChange(fid, datetime, hash, email,
+			String dbResult = fsdb.addChange(fid, datetime, hash, owner,
 					message, file_path);
 			Logger.logINFO(dbResult);
 			result = Messages.File_added;
@@ -228,7 +239,13 @@ public class FileSystem {
 		return folder_path;
 	}
 
-	private String createFile(int fid, String file_name, byte[] file_content) {
+	private String createFile(int fid, String file_rPath, byte[] file_content) {
+		String file_name = "";
+		if (file_rPath.contains("/")) {
+			file_name = file_rPath.split("/")[file_rPath.split("/").length - 1];
+		} else {
+			file_name = file_rPath.split("\\\\")[file_rPath.split("\\\\").length - 1];
+		}
 		file_name = Tools.getDateTimeNow() + " " + file_name;
 		String file_path = Settings.FS_ROOTFOLDER + fid + "/" + file_name;
 		FileOutputStream fos;
@@ -237,15 +254,12 @@ public class FileSystem {
 			File file = new File(file_path);
 			file_created = file.createNewFile();
 			if (file_created) {
-
 				fos = new FileOutputStream(file);
 				fos.write(file_content);
 				fos.flush();
 				fos.close();
-
 				Logger.logINFO(Messages.File_added.toString());
 			} else {
-
 				Logger.logINFO(Messages.File_addingFailed.toString());
 			}
 		} catch (IOException e) {
@@ -254,5 +268,4 @@ public class FileSystem {
 
 		return file_created ? file_path : null;
 	}
-
 }
