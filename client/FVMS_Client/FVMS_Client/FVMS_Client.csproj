@@ -50,7 +50,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="files\File.cs" />
+    <Compile Include="files\Folder.cs" />
     <Compile Include="Controller.cs" />
+    <Compile Include="files\FilesHandler.cs" />
     <Compile Include="forms\FormNames.cs" />
     <Compile Include="forms\FormsHolder.cs" />
     <Compile Include="forms\LoginForm.cs">
@@ -71,11 +74,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="tasks\InitTask.cs" />
+    <Compile Include="tasks\LoginTask.cs" />
+    <Compile Include="tasks\RequestTask.cs" />
+    <Compile Include="tasks\Task.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="tools\JSONManipulator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Properties\DataSources\FVMS_Client.files.File.datasource" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="forms\LoginForm.resx">

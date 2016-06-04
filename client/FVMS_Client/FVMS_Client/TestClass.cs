@@ -1,7 +1,9 @@
-﻿using System;
+﻿using FVMS_Client.forms;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -31,13 +33,11 @@ namespace FVMS_Client
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             LoginForm loginForm = new LoginForm();
+            MainForm mainForm = new MainForm();
+            FormsHandler.setMainForm(mainForm);
             FormsHandler.setLoginForm(loginForm);
             Application.Run(loginForm);
-
         }
-
-
-        
 
 
     }

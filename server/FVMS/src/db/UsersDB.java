@@ -24,7 +24,7 @@ public class UsersDB {
 	}
 
 	public void printAllUsers() {
-		String statement = "Select * from users";
+		String statement = "SELECT * FROM " + Tables.USERS;
 		db.executeStatement(statement);
 		try {
 			while (db.getResultSet().next()) {

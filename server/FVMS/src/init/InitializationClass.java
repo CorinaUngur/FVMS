@@ -2,7 +2,10 @@ package init;
 import java.io.File;
 
 import utils.Logger;
+import versioning.FileSystem;
 import config.Settings;
+import connection.Connector;
+import db.ProjectsDB;
 import db.UsersDB;
 
 public class InitializationClass {
@@ -17,7 +20,6 @@ public class InitializationClass {
 
 	private static void initializeDatabase() {
 		UsersDB.getInstance().insertUser(Settings.DB_ADMIN_USERNMANE, "default", Settings.DB_ADMIN_EMAIL);
-		
 	}
 
 	private static void createRootAndTrashFolders() {
@@ -48,5 +50,7 @@ public class InitializationClass {
 
 	public static void main(String args[]) {
 		initialization();
+		Connector conn = Connector.getInstance();
+		
 	}
 }

@@ -26,14 +26,6 @@ namespace FVMS_Client
             }
 
         }
-        public void HideFormOnProperThread(object sender, EventArgs e)
-        {
-            if (InvokeRequired) Invoke(new EventHandler(HideFormOnProperThread), sender, e);
-            else
-            {
-                this.Hide();
-            }
-        }
 
         private void click_loginButton(object sender, EventArgs e)
         {
@@ -44,5 +36,6 @@ namespace FVMS_Client
         {
             this.Hide();
         }
+
     }
 }

@@ -1,6 +1,9 @@
 ﻿
+using FVMS_Client.beans;
+using FVMS_Client.files;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,23 +13,22 @@ namespace FVMS_Client
 {
     class JSONManipulator
     {
-        public static byte[] getSendingJason(Dictionary<String, String> response)
+        public static byte[] getSendingJason(Dictionary<String, Object> response)
         {
             byte[] message;
-            HashSet<KeyValuePair<String, String>> values_list = new HashSet<KeyValuePair<String, String>>();
-            foreach (KeyValuePair<String, String> entry in response)
-            {
-                values_list.Add(entry);
-            }
-           //message  = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(values_list));
             message = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
             return message;
         }
 
-        public static Dictionary<String, String> getResponseDictionary(byte[] json)
+        public static Dictionary<String, Object> getResponseDictionary(byte[] json)
         {
             string message = Encoding.UTF8.GetString(json);
-            return JsonConvert.DeserializeObject<Dictionary<string, string>>(message);
+            return JsonConvert.DeserializeObject<Dictionary<string, Object>>(message);
+        }
+
+        internal static List<T> DeserializeList<T>(string jsonString)
+        {
+            return JsonConvert.DeserializeObject<List<T>>(jsonString);
         }
     }
 }

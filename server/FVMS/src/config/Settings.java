@@ -26,15 +26,20 @@ public class Settings {
 		DB_USER=properties.getProperty("db_user");
 		DB_ADMIN_USERNMANE=properties.getProperty("db_admin_user");
 		DB_ADMIN_EMAIL=properties.getProperty("db_admin_email");
-		
-		DB_PASSWORD=properties.getProperty("db_password");
+
 		TRASH_ENABLED = Boolean.parseBoolean(properties.getProperty("trash_enabled"));
 		TRASH_EXPTIME = Integer.parseInt(properties.getProperty("trash_expirationTime"));
 		TRASH_MAXSIZE = Integer.parseInt(properties.getProperty("trash_limit"));
 		TRASH_FOLDER = properties.getProperty("trash_folder");
+		
 		FS_ROOTFOLDER = properties.getProperty("fileSystem_rootFolder");
+		
 		CONN_QLOGIN = properties.getProperty("conn_loginQueue");
+		CONN_QINIT = properties.getProperty("conn_initQueue");
+		CONN_QLOGOUT = properties.getProperty("conn_logoutQueue");
 		CONN_HOST = properties.getProperty("conn_host");
+		CONN_HISTORY = properties.getProperty("conn_historyQueue");
+		
 		LOGGER_WRITER = properties.getProperty("logger_writer");
 		
 	}
@@ -52,5 +57,8 @@ public class Settings {
 	public static String FS_ROOTFOLDER = "./";
 	public static String CONN_QLOGIN="QLogin";
 	public static String CONN_HOST="localost";
+	public static String CONN_QINIT = "QInit";
+	public static String CONN_QLOGOUT = "QLogout";
+	public static String CONN_HISTORY="QHistory";
 	public static String LOGGER_WRITER="console";
 }

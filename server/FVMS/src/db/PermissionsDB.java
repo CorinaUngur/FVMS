@@ -31,9 +31,13 @@ public class PermissionsDB {
 					Columns.PPermissions_rights, Tables.PROJECT_PERMISSIONS,
 					true);
 		} else {
-			String values = uid + "," + pid + ",\"" + permission + "\"";
-			db.insertRowIntoTable(values, Tables.PROJECT_PERMISSIONS);
-			return Messages.Permission_set.toString();
+			if (!hasPermission_onProject(uid, pid, permission)) {
+				String values = uid + "," + pid + ",\"" + permission + "\"";
+				db.insertRowIntoTable(values, Tables.PROJECT_PERMISSIONS);
+				return Messages.Permission_set.toString();
+			} else {
+				return Messages.Permission_alreadySet.toString();
+			}
 		}
 	}
 

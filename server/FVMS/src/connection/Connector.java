@@ -3,6 +3,9 @@ package connection;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
 import utils.Logger;
@@ -19,15 +22,29 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 
 import config.Settings;
+import connection.tasks.InitTask;
+import connection.tasks.LogOutTask;
+import connection.tasks.LoginTask;
 import connection.tools.Config;
-import db.UsersDB;
-import db.tools.Messages;
 
 public class Connector {
 	private static Connector instance = null;
 	private Channel channel = null;
-	private QueueingConsumer login = null;
-	private UsersDB db = UsersDB.getInstance();
+	private QueueingConsumer loginQ = null;
+	private QueueingConsumer initQ = null;
+	private QueueingConsumer logoutQ = null;
+	private static final ExecutorService threadpool = Executors.newFixedThreadPool(3);
+	
+	private static final ConcurrentLinkedQueue<Integer> loggedUsers = new ConcurrentLinkedQueue<Integer>();
+
+
+	public static ConcurrentLinkedQueue<Integer> getLoggedusers() {
+		return loggedUsers;
+	}
+
+	public static ExecutorService getThreadpool() {
+		return threadpool;
+	}
 
 	private Connector() {
 		ConnectionFactory factory = new ConnectionFactory();
@@ -35,12 +52,7 @@ public class Connector {
 		try {
 			Connection connection = factory.newConnection();
 			channel = connection.createChannel();
-			Map<String, Object> args = new HashMap<String, Object>();
-			args.put("x-message-ttl", Config.MessageExpirationTime.getInt());
-			channel.queueDeclare(Settings.CONN_QLOGIN, false, false, false,
-					args);
-			create_consumers();
-			channel.basicConsume(Settings.CONN_QLOGIN, login);
+			prepareQueues();
 			startMainLoop();
 		} catch (IOException e) {
 			Logger.logERROR(e);
@@ -48,6 +60,24 @@ public class Connector {
 			Logger.logERROR(e);
 		}
 
+	}
+
+	private void prepareQueues() throws IOException {
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("x-message-ttl", Config.MessageExpirationTime.getInt());
+		
+		loginQ = startConsuming(Settings.CONN_QLOGIN, args);
+		initQ = startConsuming(Settings.CONN_QINIT, args);
+		logoutQ = startConsuming(Settings.CONN_QLOGOUT, args);
+	
+	}
+
+	private QueueingConsumer startConsuming(String queue_name, Map<String, Object> args) throws IOException {
+		channel.queueDeclare(queue_name, false, false, false,
+				args);
+		QueueingConsumer queue = new QueueingConsumer(channel);
+		channel.basicConsume(queue_name, queue);
+		return queue;
 	}
 
 	public static Connector getInstance() {
@@ -58,25 +88,14 @@ public class Connector {
 	}
 
 	private void startMainLoop() {
-		HashMap<String, String> credentials = null;
-
-		while (true) {
-			QueueingConsumer.Delivery delivery;
-			try {
-				delivery = login.nextDelivery();
-				credentials = getMessage(delivery.getBody());
-				sendLogInResponse(delivery.getProperties(), credentials);
-			} catch (Exception e) {
-				Logger.logERROR(e);
-				startMainLoop();
-			}
-		}
-
+		threadpool.submit(new LoginTask(loginQ, this));
+		threadpool.submit(new InitTask(initQ, this));
+		threadpool.submit(new LogOutTask(logoutQ, this));
 	}
 
-	private HashMap<String, String> getMessage(byte[] deliveryBody)
+	public HashMap<String, Object> getMessage(byte[] deliveryBody)
 			throws JsonParseException, JsonMappingException, IOException {
-		HashMap<String, String> credentials = null;
+		HashMap<String, Object> credentials = null;
 
 		String message = new String(deliveryBody);
 		System.out.println(message);
@@ -90,37 +109,17 @@ public class Connector {
 		return credentials;
 	}
 
-	private void sendLogInResponse(BasicProperties props,
-			HashMap<String, String> credentials) throws JsonProcessingException {
-		String authorization = "";
-		String result = "";
-		if (credentials != null) {
-			String username = credentials.get("username");
-			String password = credentials.get("password");
-			result = db.checkUser_byUsername(username, password);
+	public void sendResponse(BasicProperties props,
+			HashMap<String, Object> responseMap) throws JsonProcessingException {
 
-			if (result.equals(Messages.Login_succesfull.toString())) {
-				authorization = "1";
-			} else {
-				authorization = "0";
-			}
-		} else {
-			authorization = "0";
-			result = Messages.MessageInWrongFormat.toString();
-		}
-		HashMap<String, String> responseMap = new HashMap<>();
-		responseMap.put("authorized", authorization);
-		responseMap.put("message", result);
 		ObjectMapper resultMapper = new ObjectMapper();
 		byte[] response = resultMapper.writeValueAsBytes(responseMap);
 		BasicProperties replyToProps = new BasicProperties.Builder()
 				.correlationId(props.getCorrelationId()).build();
+		Logger.logINFO("Sending... " + String.valueOf(response));
 		sendMessage(props, replyToProps, response);
 	}
 
-	private void create_consumers() {
-		login = new QueueingConsumer(channel);
-	}
 
 	private void sendMessage(BasicProperties props,
 			BasicProperties replyToProps, byte[] message) {

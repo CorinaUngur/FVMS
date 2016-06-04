@@ -119,7 +119,6 @@
             this.ResumeLayout(false);
             this.PerformLayout();
 
-            this.HideEvent += new System.EventHandler(this.HideFormOnProperThread);
         }
 
         #endregion

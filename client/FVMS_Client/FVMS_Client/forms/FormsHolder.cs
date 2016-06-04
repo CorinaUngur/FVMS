@@ -1,4 +1,6 @@
-﻿using FVMS_Client.forms;
+﻿using FVMS_Client.files;
+using FVMS_Client.forms;
+using FVMS_Client.tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +25,10 @@ namespace FVMS_Client
             mainForm = form;
         }
 
+        public static void initializeMainForm()
+        {
+            mainForm.nameLabel.Text = LoggedUser.Name;
+        }
         public static void setLoginResponse(string response)
         {
             loginForm.Set_LoginResponseMessage(response);
@@ -30,9 +36,28 @@ namespace FVMS_Client
 
         public static void ReplaceLoginWithMainForm()
         {
-            loginForm.HideFormOnProperThread(null, EventArgs.Empty);
-            setMainForm(new MainForm());
-            Application.Run(mainForm);
+            DoOnUIThread(loginForm, delegate()
+            {
+                loginForm.Hide();
+            });
+            DoOnUIThread(mainForm, delegate()
+            {
+                mainForm.Show();
+            });
+        }
+
+        private static void DoOnUIThread(Form f, MethodInvoker d)
+        {
+            if (f.InvokeRequired) { f.Invoke(d); } else { d(); }
+        }
+
+        internal static void createProjectsTree()
+        {
+            DoOnUIThread(mainForm, delegate()
+            {
+                mainForm.GenerateTree(FilesHandler.getInstance().getFoldersList());
+            });
+            
         }
     }
 }
