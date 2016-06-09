@@ -6,11 +6,9 @@ import utils.Logger;
 
 import com.rabbitmq.client.QueueingConsumer;
 
-import connection.Connector;
-
 public abstract class RequestTask extends Task {
-	public RequestTask(QueueingConsumer loginQ, Connector conn) {
-		super(loginQ, conn);
+	public RequestTask(QueueingConsumer loginQ) {
+		super(loginQ);
 	}
 
 	@Override
@@ -19,7 +17,7 @@ public abstract class RequestTask extends Task {
 		while (true) {
 			QueueingConsumer.Delivery delivery;
 			try {
-				delivery = getLoginQ().nextDelivery();
+				delivery = getQueue().nextDelivery();
 				request = getConn().getMessage(delivery.getBody());
 				HashMap<String, Object> responseMap = getResponse(request);
 				getConn().sendResponse(delivery.getProperties(), responseMap);

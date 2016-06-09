@@ -51,6 +51,6 @@ public class InitializationClass {
 	public static void main(String args[]) {
 		initialization();
 		Connector conn = Connector.getInstance();
-		
+		conn.startMainLoop();
 	}
 }

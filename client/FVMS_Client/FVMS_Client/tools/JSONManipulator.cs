@@ -30,5 +30,10 @@ namespace FVMS_Client
         {
             return JsonConvert.DeserializeObject<List<T>>(jsonString);
         }
+
+        internal static Dictionary<int, T> DeserializeDict<T>(String map)
+        {
+            return JsonConvert.DeserializeObject<Dictionary<int, T>>(map);
+        }
     }
 }

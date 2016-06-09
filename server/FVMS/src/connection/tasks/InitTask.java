@@ -10,8 +10,8 @@ import db.ProjectsDB;
 public class InitTask extends RequestTask {
 	ProjectsDB pdb = ProjectsDB.getInstance();
 
-	public InitTask(QueueingConsumer loginQ, Connector conn) {
-		super(loginQ, conn);
+	public InitTask(QueueingConsumer initQueue) {
+		super(initQueue);
 	}
 
 	@Override

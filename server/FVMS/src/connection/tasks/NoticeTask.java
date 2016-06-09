@@ -6,21 +6,19 @@ import utils.Logger;
 
 import com.rabbitmq.client.QueueingConsumer;
 
-import connection.Connector;
-
 public abstract class NoticeTask extends Task {
 
-	public NoticeTask(QueueingConsumer loginQ, Connector conn) {
-		super(loginQ, conn);
+	public NoticeTask(QueueingConsumer loginQ) {
+		super(loginQ);
 	}
-	
+
 	@Override
 	public void run() {
 		HashMap<String, Object> request = null;
 		while (true) {
 			QueueingConsumer.Delivery delivery;
 			try {
-				delivery = getLoginQ().nextDelivery();
+				delivery = getQueue().nextDelivery();
 				request = getConn().getMessage(delivery.getBody());
 				executeRequest(request);
 			} catch (Exception e) {

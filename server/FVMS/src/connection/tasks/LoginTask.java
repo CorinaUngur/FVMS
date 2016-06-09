@@ -14,8 +14,8 @@ public class LoginTask extends RequestTask {
 
 	private static UsersDB db = UsersDB.getInstance();
 
-	public LoginTask(QueueingConsumer loginQ, Connector conn) {
-		super(loginQ, conn);
+	public LoginTask(QueueingConsumer loginQ) {
+		super(loginQ);
 	}
 
 	@Override

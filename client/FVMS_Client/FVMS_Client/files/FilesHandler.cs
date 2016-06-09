@@ -25,7 +25,7 @@ namespace FVMS_Client.files
             return instance;
         }
 
-        public void createFoldersMap(string projects)
+        public List<Folder> addFolders(string projects)
         {
            Dictionary<String, Folder> foldersMap = new Dictionary<string,Folder>();
            List<Folder> initialFolders = JSONManipulator.DeserializeList<Folder>(projects);
@@ -33,10 +33,13 @@ namespace FVMS_Client.files
            {
                foldersQueue.Enqueue(fld);
                foldersMap.Add(fld.name, fld);
-               String pathSoFar = fld.name;
-               for (int i = 0; i < fld.GetFilesCount(); i++)
+               fld.path = fld.name;
+               List<File> filesInInitialFolder = fld.GetFiles();
+               for (int i = 0; i < filesInInitialFolder.Count(); i++)
                {
-                   File file = fld.getFile(i);
+
+                   String pathSoFar = fld.name;
+                   File file = filesInInitialFolder.ElementAt(i);
                    String file_path = file.path;
                    IEnumerable<string> folders = file_path.Replace('\\','/').Split('/'); ;
                    String newPath = pathSoFar;
@@ -47,16 +50,19 @@ namespace FVMS_Client.files
                    {
                         for (int j =0; j < folders.Count() - 1; j++)
                         {
-                            newPath  += "." + folders.ElementAt(j);
+                            newPath  += "/" + folders.ElementAt(j);
                             Folder parentFolder = GetFolderInMap(foldersMap, pathSoFar);
                             Folder childFolder = GetFolderInMap(foldersMap, newPath);
-                            parentFolder.addChild(childFolder);
+                            parentFolder.addChildIfNotThere(childFolder);
                             pathSoFar = newPath;
                         }
                         GetFolderInMap(foldersMap,pathSoFar).addFile(file);
+                        fld.removeFile(file);
                    }
+                   
                }
            }
+           return foldersQueue.ToList<Folder>();
         }
 
         private Folder GetFolderInMap(Dictionary<String, Folder> foldersMap, String key)
@@ -68,7 +74,7 @@ namespace FVMS_Client.files
             }
             else
             {
-                fileFolder = new Folder(null,key.Split('.').Last());
+                fileFolder = new Folder(null,key.Split('/').Last());
                 foldersMap.Add(key, fileFolder);
                 fileFolder.path = key;
             }
@@ -79,5 +85,11 @@ namespace FVMS_Client.files
         {
             return foldersQueue.ToList<Folder>();
         }
+
+        internal List<File> getFiles(string outString)
+        {
+            return JSONManipulator.DeserializeList<File>(outString);
+        }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using FVMS_Client.files;
+﻿using FVMS_Client.beans;
+using FVMS_Client.files;
 using FVMS_Client.forms;
 using FVMS_Client.tools;
 using System;
@@ -51,13 +52,31 @@ namespace FVMS_Client
             if (f.InvokeRequired) { f.Invoke(d); } else { d(); }
         }
 
-        internal static void createProjectsTree()
+        internal static void createProjectsTree(List<Folder> foldersList)
         {
             DoOnUIThread(mainForm, delegate()
             {
-                mainForm.GenerateTree(FilesHandler.getInstance().getFoldersList());
+                mainForm.GenerateTree(foldersList);
             });
             
+        }
+
+        internal static void addFilesToHistoryGrid(List<File> files)
+        {
+            DoOnUIThread(mainForm, delegate()
+            {
+                mainForm.setHistoryGrid(files);
+            });
+        }
+
+        internal static void setFileChanged(File file)
+        {
+            mainForm.setFileChanged(file);
+        }
+
+        internal static void popup(String message)
+        {
+            (new MessagePopup(message)).ShowDialog();
         }
     }
 }

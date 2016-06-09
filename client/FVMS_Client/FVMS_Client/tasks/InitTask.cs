@@ -1,4 +1,6 @@
-﻿using FVMS_Client.files;
+﻿using FVMS_Client.beans;
+using FVMS_Client.files;
+using FVMS_Client.tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +12,7 @@ namespace FVMS_Client.tasks
     class InitTask : RequestTask
     {
         public InitTask()
-            : base(Controller.getInstance().QInit)
+            : base(Queues.QInit)
         {
 
         }
@@ -20,15 +22,14 @@ namespace FVMS_Client.tasks
             Object outVal;
             response.TryGetValue("projects", out outVal);
             String outString = outVal.ToString();
-            Console.Write(outVal);
-            FilesHandler.getInstance().createFoldersMap(outString);
-            FormsHandler.createProjectsTree();
+            List<Folder> folders = FilesHandler.getInstance().addFolders(outString);
+            FormsHandler.createProjectsTree(folders);
         }
 
         public override Dictionary<string, object> prepareMessage()
         {
             Dictionary<string, object> mesg = new Dictionary<string,object>();
-            mesg.Add("uid", this.Ctrl.uid);
+            mesg.Add("uid", LoggedUser.uid);
             return mesg;
         }
     }

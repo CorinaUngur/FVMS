@@ -12,7 +12,7 @@ namespace FVMS_Client.tasks
         private String username;
         private String password;
 
-        public LoginTask(String username, String password) : base(Controller.getInstance().QLogin)
+        public LoginTask(String username, String password) : base(Queues.QLogin)
         {
             this.username = username;
             this.password = password;
@@ -39,7 +39,7 @@ namespace FVMS_Client.tasks
                     response.TryGetValue("uid", out ouid);
                     response.TryGetValue("username", out username);
                     LoggedUser.Name = username.ToString();
-                    Ctrl.uid = Int32.Parse(ouid.ToString());
+                    LoggedUser.uid = Int32.Parse(ouid.ToString());
                     FormsHandler.setLoginResponse("Authorized");
                     FormsHandler.ReplaceLoginWithMainForm();
                     Ctrl.Init();

@@ -2,11 +2,15 @@ package db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import utils.Logger;
+import db.beans.File;
 import db.tools.Columns;
 import db.tools.Config;
 import db.tools.Messages;
+import db.tools.StatementExecutor;
 import db.tools.Tables;
 
 public class FileSystemDB {
@@ -25,8 +29,8 @@ public class FileSystemDB {
 		return instance;
 	}
 
-	public String addNewFile(int fid, String userName, String path, String hash,
-			String datetime) {
+	public String addNewFile(int fid, String userName, String path,
+			String hash, String datetime) {
 		String result = insertChange(fid, fid, datetime, hash, userName,
 				Config.NEWFILE_DEFAULTMESSAGE.toString(), path);
 		return result;
@@ -77,13 +81,12 @@ public class FileSystemDB {
 	public String getLastChangePath(int fid) {
 		String result = null;
 		if (db.isValuePresentInTable(fid, Columns.Changes_FID, Tables.CHANGES)) {
-			String statement = "SELECT LAST(" + Columns.Changes_Path
-					+ ") FROM " + Tables.CHANGES;
-			result = getPath(statement);
+			String statement = "SELECT " + Columns.Changes_Path
+					+ " FROM " + Tables.CHANGES +" WHERE " + Columns.Changes_FID + "=" + fid + " ORDER BY " + Columns.Changes_ID + " DESC LIMIT 1"; 
+			result = getFirstStringResult(statement);
 		} else {
 			result = Messages.File_doesNotExist.toString();
 		}
-
 		return result;
 	}
 
@@ -105,8 +108,7 @@ public class FileSystemDB {
 			String statement = "SELECT " + Columns.Changes_Path + " FROM "
 					+ Tables.CHANGES + " WHERE " + Columns.Changes_Hash + "=\""
 					+ hash + "\";";
-			result = getPath(statement);
-
+			result = getFirstStringResult(statement);
 		}
 		return result;
 	}
@@ -132,13 +134,15 @@ public class FileSystemDB {
 
 	public int moveFileToTrash(int id) {
 		int filesUpdated = 0;
-		String statement="";
-		if(db.isValuePresentInTable(id, Columns.FileStatus_FID, Tables.FILE_STATUS)){
-		statement = "UPDATE " + Tables.FILE_STATUS + " SET "
-				+ Columns.FileStatus_status + "=" + Config.STATUS_MOVEDTOTRASH
-				+ " WHERE " + Columns.FileStatus_FID + "=" + id;
+		String statement = "";
+		if (db.isValuePresentInTable(id, Columns.FileStatus_FID,
+				Tables.FILE_STATUS)) {
+			statement = "UPDATE " + Tables.FILE_STATUS + " SET "
+					+ Columns.FileStatus_status + "="
+					+ Config.STATUS_MOVEDTOTRASH + " WHERE "
+					+ Columns.FileStatus_FID + "=" + id;
 
-		filesUpdated = db.executeUpdate(statement);
+			filesUpdated = db.executeUpdate(statement);
 		} else {
 			String values = id + "," + Config.STATUS_MOVEDTOTRASH;
 			db.insertRowIntoTable(values, Tables.FILE_STATUS);
@@ -149,14 +153,15 @@ public class FileSystemDB {
 	public int removeTrashFiles() {
 		int removedFiles = 0;
 		String statement = "DELETE FROM " + Tables.CHANGES + " WHERE (SELECT "
-						+ Columns.FileStatus_status + " FROM " + Tables.FILE_STATUS
-						+ " WHERE " + Columns.FileStatus_FID + "=" + Tables.CHANGES
-						+ "." + Columns.Changes_FID + ") =" + Config.STATUS_MOVEDTOTRASH;
+				+ Columns.FileStatus_status + " FROM " + Tables.FILE_STATUS
+				+ " WHERE " + Columns.FileStatus_FID + "=" + Tables.CHANGES
+				+ "." + Columns.Changes_FID + ") ="
+				+ Config.STATUS_MOVEDTOTRASH;
 		removedFiles = db.executeUpdate(statement);
 		return removedFiles;
 	}
 
-	public String[] getFileVersions(int id) {
+	public String[] getFileVersionsPaths(int id) {
 		String statement = "SELECT COUNT(" + Columns.Changes_FID + ") FROM "
 				+ Tables.CHANGES;
 		db.executeUpdate(statement);
@@ -200,7 +205,8 @@ public class FileSystemDB {
 	public int getStatus(int id) {
 		int status = -1;
 		String statement = "SELECT " + Columns.FileStatus_status + " FROM "
-				+ Tables.FILE_STATUS + " WHERE " + Columns.FileStatus_FID + "=" + id;
+				+ Tables.FILE_STATUS + " WHERE " + Columns.FileStatus_FID + "="
+				+ id;
 		db.executeStatement(statement);
 		try {
 			db.getResultSet().first();
@@ -211,7 +217,7 @@ public class FileSystemDB {
 		return status;
 	}
 
-	private String getPath(String statement) {
+	private String getFirstStringResult(String statement) {
 		String result = null;
 		boolean weHaveResults = false;
 
@@ -230,6 +236,23 @@ public class FileSystemDB {
 		db.closeStatementsAndResultSets();
 		return result;
 	}
+	private int getFirstIntResult(String statement) {
+		int result = -1;
+		boolean weHaveResults = false;
+
+		db.executeStatement(statement);
+		try {
+			weHaveResults = db.getResultSet().first();
+			if (weHaveResults) {
+				result = db.getResultSet().getInt(1);
+			} 
+		} catch (SQLException e) {
+			db.logSQLException("getPath", e);
+		}
+
+		db.closeStatementsAndResultSets();
+		return result;
+	}
 
 	private String insertChange(int cid, int id, String datetime, String hash,
 			String owner, String message, String path) {
@@ -239,7 +262,8 @@ public class FileSystemDB {
 			result = Messages.File_alreadySaved;
 		} else {
 			String values = cid + "," + id + ", \"" + datetime + "\",\"" + hash
-					+ "\",\"" + owner + "\",\"" + message + "\",\"" + path + "\"";
+					+ "\",\"" + owner + "\",\"" + message + "\",\"" + path
+					+ "\"";
 			int rows_affected = db.insertRowIntoTable(values, Tables.CHANGES);
 			if (rows_affected > 0) {
 				result = Messages.Change_added;
@@ -248,6 +272,41 @@ public class FileSystemDB {
 			}
 		}
 		return result.toString();
+	}
+
+	public List<File> getFileHistory(int fid, int pid) {
+		List<File> files = new ArrayList<File>();
+		StatementExecutor statement = new StatementExecutor();
+		String statementString = statement
+				.select(Columns.Changes_date, Columns.Changes_ID,
+						Columns.Changes_message, Columns.Changes_Path,Columns.Changes_owner)
+				.from(Tables.CHANGES).where().equals(Columns.Changes_FID, fid)
+				.getStringStatement();
+		ResultSet rs = db.executeStatement(statementString);
+		try {
+			while(rs.next()){
+				String path = rs.getString(Columns.Changes_Path.toString());
+				String date = rs.getString(Columns.Changes_date.toString());
+				String message = rs.getString(Columns.Changes_message.toString());
+				String owner = rs.getString(Columns.Changes_owner.toString());
+				int cid = rs.getInt(Columns.Changes_ID.toString());
+				files.add(new File(cid,pid, path, date, message, owner));
+			}
+		} catch (SQLException e) {
+			Logger.logERROR(e);
+		}
+		return files;
+
+	}
+
+	public int getLastChangeID(int fid) {
+		int result = -1;
+		if (db.isValuePresentInTable(fid, Columns.Changes_FID, Tables.CHANGES)) {
+			String statement = "SELECT " + Columns.Changes_ID
+					+ " FROM " + Tables.CHANGES +" WHERE " + Columns.Changes_FID + "=" + fid + " ORDER BY " + Columns.Changes_ID + " DESC LIMIT 1"; 
+			result = getFirstIntResult(statement);
+		} 
+		return result;
 	}
 
 }

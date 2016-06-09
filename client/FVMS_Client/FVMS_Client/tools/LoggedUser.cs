@@ -8,7 +8,7 @@ namespace FVMS_Client.tools
 {
     public static class LoggedUser
     {
-        public static string Name = "buddy";
-        public static int uid=-1;
+        public static string Name {get; set;}
+        public static int uid {get; set;}
     }
 }

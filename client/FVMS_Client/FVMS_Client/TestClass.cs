@@ -1,4 +1,5 @@
 ﻿using FVMS_Client.forms;
+using FVMS_Client.tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,9 @@ namespace FVMS_Client
         [STAThread]
         static void Main(string[] args)
         {
+
+            LoggedUser.uid = -1;
+            LoggedUser.Name = "buddy";
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             LoginForm loginForm = new LoginForm();
@@ -37,6 +41,7 @@ namespace FVMS_Client
             FormsHandler.setMainForm(mainForm);
             FormsHandler.setLoginForm(loginForm);
             Application.Run(loginForm);
+
         }
 
 

@@ -12,29 +12,33 @@ namespace FVMS_Client.beans
     {
         public String name { get; set; }
         private File[] files {get; set;}
-        private ConcurrentQueue<File> concurrFiles;
+        private List<File> concurrFiles;
 
-        private ConcurrentQueue<Folder> childs;
+        private List<Folder> childs;
         private string folder_name;
         public string path;
+        public int pid { get; set; }
 //        public Folder( List<File> files, String name)
         public Folder(List<File> files, String name)
         {
             this.name = name;
-            concurrFiles = new ConcurrentQueue<File>();
-            childs = new ConcurrentQueue<Folder>();
+            concurrFiles = new List<File>();
+            childs = new List<Folder>();
             if(files != null)
             foreach(File f in files){
-                this.concurrFiles.Enqueue(f);
+                this.concurrFiles.Add(f);
             }
         }
 
         public void addFile(File file){
-            concurrFiles.Enqueue(file);
+            concurrFiles.Add(file);
         }
-        public void addChild(Folder folder)
+        public void addChildIfNotThere(Folder folder)
         {
-            childs.Enqueue(folder);
+            if (!childs.Contains(folder))
+            {
+                childs.Add(folder);
+            }
         }
 
         internal int GetFilesCount()
@@ -55,6 +59,11 @@ namespace FVMS_Client.beans
         internal List<File> GetFiles()
         {
             return concurrFiles.ToList<File>();
+        }
+
+        internal void removeFile(File file)
+        {
+            concurrFiles.Remove(file);
         }
     }
 }

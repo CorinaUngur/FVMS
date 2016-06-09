@@ -1,5 +1,6 @@
 package db;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import utils.Logger;
@@ -7,6 +8,7 @@ import utils.Tools;
 import config.Settings;
 import db.tools.Columns;
 import db.tools.Messages;
+import db.tools.StatementExecutor;
 import db.tools.Tables;
 
 public class UsersDB {
@@ -361,6 +363,21 @@ public class UsersDB {
 		}
 		db.closeStatementsAndResultSets();
 		return result;
+	}
+
+	public String getUsername(int uid) {
+		StatementExecutor statement = new StatementExecutor();
+		statement.select(Columns.USERS_username).from(Tables.USERS).where().equals(Columns.USERS_Id, uid);
+		ResultSet rs = db.executeStatement(statement.getStringStatement());
+		String username = null;
+		try {
+			while(rs.next()){
+				username = rs.getString(Columns.USERS_username.toString());
+			}
+		} catch (SQLException e) {
+			Logger.logERROR(e);
+		}
+		return username;
 	}
 
 }

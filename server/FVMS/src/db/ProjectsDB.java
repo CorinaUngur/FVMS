@@ -135,7 +135,7 @@ public class ProjectsDB {
 
 		try {
 			while (rs.next()) {
-				int pid = rs.getInt(1);
+				int pid = rs.getInt(Columns.PPermissions_project.toString());
 				statement = "SELECT " + Columns.Projects_Name + " FROM "
 						+ Tables.PROJECTS + " WHERE " + Columns.Projects_ID
 						+ "=" + pid;
@@ -164,13 +164,14 @@ public class ProjectsDB {
 							.toString());
 					String comment = frs.getString(Columns.Changes_message
 							.toString());
-					String ownerName = frs.getString(Columns.Changes_owner.toString());
-					
-					files.add(new File(currentFile_id, path, lastModified,
+					String ownerName = frs.getString(Columns.Changes_owner
+							.toString());
+
+					files.add(new File(currentFile_id, pid, path, lastModified,
 							comment, ownerName));
 				}
 
-				projects.add(new Project(name, files));
+				projects.add(new Project(pid, name, files));
 
 			}
 
@@ -185,6 +186,18 @@ public class ProjectsDB {
 		db.removeAllFromTable(Tables.PROJECT_FILES);
 		db.removeAllFromTable(Tables.PROJECT_PERMISSIONS);
 		db.removeAllFromTable(Tables.PROJECTS);
+	}
+
+	public String changeVersionToProject(int pid, int fid, int oldCid) {
+		String result = null;
+		String statement = "UPDATE " + Tables.PROJECT_FILES + " SET "
+				+ Columns.ProjectFiles_CID + "=" + fid + " WHERE "
+				+ Columns.ProjectFiles_CID + "=" + oldCid + " AND "
+				+ Columns.ProjectFiles_PID + "=" + pid;
+		int rows_affected = db.executeUpdate(statement);
+		Logger.logINFO(rows_affected + "project files updated.");
+		return result;
+
 	}
 
 }

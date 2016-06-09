@@ -10,7 +10,7 @@ namespace FVMS_Client.tasks
     class LogOutTask : NoticeTask
     {
         public LogOutTask()
-            : base(Ctrl.QLogOut)
+            : base(Queues.QLogout)
         {
 
         }

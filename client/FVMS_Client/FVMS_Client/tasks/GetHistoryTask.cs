@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FVMS_Client.files;
+using FVMS_Client.tools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,21 +10,28 @@ namespace FVMS_Client.tasks
 {
     class GetHistoryTask : RequestTask
     {
-        private object p;
-
-        public GetHistoryTask(object p) : base(Ctrl.QHistory)
+        private File file;
+        public GetHistoryTask(File file) : base(Queues.QHistory)
         {
-            // TODO: Complete member initialization
-            this.p = p;
+            this.file = file;
         }
         public override void treatResponse(Dictionary<string, object> response)
         {
-            throw new NotImplementedException();
+            Object outVal;
+            response.TryGetValue("changes", out outVal);
+            String outString = outVal.ToString();
+            List<File> files = FilesHandler.getInstance().getFiles(outString);
+            files.Reverse();
+            FormsHandler.addFilesToHistoryGrid(files);
         }
 
         public override Dictionary<string, object> prepareMessage()
         {
-            throw new NotImplementedException();
+            Dictionary<string, object> msg = new Dictionary<string, object>();
+            msg.Add("uid", LoggedUser.uid);
+            msg.Add("fid", file.id);
+            msg.Add("pid", file.pid);
+            return msg;
         }
     }
 }

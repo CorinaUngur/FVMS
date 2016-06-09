@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FVMS_Client.tasks
 {
-    abstract class Task
+    public abstract class Task
     {
         public static Controller Ctrl = Controller.getInstance();
         public String Queue { get; private set; }

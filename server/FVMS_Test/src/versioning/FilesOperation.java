@@ -81,7 +81,7 @@ public class FilesOperation {
 		fs.add_newFile(standard_content, fileName, user,pid);
 		int id = fsdb.getChangeID(Tools.hashContent(standard_content));
 		byte[] changed_content = "changed content".getBytes();
-		String result = fs.addChange(id, user, changed_content, fileName,
+		String result = fs.addChange(id,pid, user, changed_content, fileName,
 				message);
 
 		Assert.assertEquals(Messages.File_added.toString(), result);
@@ -96,7 +96,7 @@ public class FilesOperation {
 		fs.add_newFile(standard_content, fileName, user,pid);
 		int id = fsdb.getChangeID(Tools.hashContent(standard_content));
 		byte[] changed_content = "changed content".getBytes();
-		fs.addChange(id, user, changed_content, fileName, "test change");
+		fs.addChange(id, pid, user, changed_content, fileName, "test change");
 
 		String result = fs.moveFileToTrash(id);
 		Assert.assertEquals(Messages.File_removed.toString(), result);
@@ -115,7 +115,7 @@ public class FilesOperation {
 		fs.add_newFile(standard_content, fileName, user,pid);
 		int id = fsdb.getChangeID(Tools.hashContent(standard_content));
 		byte[] changed_content = "changed content".getBytes();
-		fs.addChange(id, user, changed_content, fileName, "test change");
+		fs.addChange(id, pid, user, changed_content, fileName, "test change");
 
 		String result = fs.emptyTrash();
 		Assert.assertEquals(Messages.Trash_empty.toString(), result);

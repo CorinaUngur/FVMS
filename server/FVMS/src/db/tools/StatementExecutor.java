@@ -29,13 +29,8 @@ public class StatementExecutor {
 		return this;
 	}
 
-	public StatementExecutor from(Tables table) {
-		statement += table;
-		return this;
-	}
-
 	public StatementExecutor from(Tables... table) {
-		statement += table[0];
+		statement +=" FROM " + table[0];
 		for (int i = 1; i < table.length; i++) {
 			statement += ", " + table[i];
 		}
@@ -70,7 +65,9 @@ public class StatementExecutor {
 		statement += ") ";
 		return this;
 	}
-
+	public String getStringStatement(){
+		return statement;
+	}
 	public ResultSet executeStatement() {
 		ResultSet rs = null;
 		Statement stmt = getStatement();
@@ -115,6 +112,12 @@ public class StatementExecutor {
 
 		}
 		return stmt;
+	}
+
+	public StatementExecutor equals(Columns col, int value) {
+		statement += col + "=" + value + " ";
+		return this;
+		
 	}
 
 }

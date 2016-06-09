@@ -9,19 +9,13 @@ using FVMS_Client.tasks;
 
 namespace FVMS_Client
 {
-    class Controller
+    public class Controller
     {
         private IConnection connection;
         private IModel channel;
         private string replyQueueName;
         private QueueingBasicConsumer consumer;
         private static Controller instance = null;
-
-        public String QLogin {get; private set;}
-        public String QInit { get; private set; }
-        public String QLogOut { get; private set; }
-        public String QHistory { get; private set; }
-        public int uid {get; set;}
 
         private Controller()
         {
@@ -33,11 +27,6 @@ namespace FVMS_Client
             channel.BasicConsume(queue: replyQueueName,
                                  noAck: true,
                                  consumer: consumer);
-
-            QLogin = "QLogin";
-            QInit = "QInit";
-            QLogOut = "QLogout";
-            QHistory = "QHistory";
         }
 
         public static Controller getInstance()

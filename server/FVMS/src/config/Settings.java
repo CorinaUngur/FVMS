@@ -38,7 +38,9 @@ public class Settings {
 		CONN_QINIT = properties.getProperty("conn_initQueue");
 		CONN_QLOGOUT = properties.getProperty("conn_logoutQueue");
 		CONN_HOST = properties.getProperty("conn_host");
-		CONN_HISTORY = properties.getProperty("conn_historyQueue");
+		CONN_QHISTORY = properties.getProperty("conn_historyQueue");
+		CONN_QUPLOAD = properties.getProperty("conn_uploadQueue");
+		CONN_QDOWNLOAD = properties.getProperty("conn_downloadQueue");
 		
 		LOGGER_WRITER = properties.getProperty("logger_writer");
 		
@@ -59,6 +61,8 @@ public class Settings {
 	public static String CONN_HOST="localost";
 	public static String CONN_QINIT = "QInit";
 	public static String CONN_QLOGOUT = "QLogout";
-	public static String CONN_HISTORY="QHistory";
+	public static String CONN_QHISTORY="QHistory";
 	public static String LOGGER_WRITER="console";
+	public static String CONN_QUPLOAD = "QSaveChanges";
+	public static String CONN_QDOWNLOAD = "QDownload";
 }

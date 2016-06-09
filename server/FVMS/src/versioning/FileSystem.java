@@ -3,6 +3,7 @@ package versioning;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
@@ -64,15 +65,21 @@ public class FileSystem {
 		return result;
 	}
 
-	public String addChange(int fid, String owner, byte[] file_content,
-			String file_name, String message) {
+	public String addChange(int fid, int pid, String owner, byte[] file_content,
+			String file_rpath, String message) {
 		Messages result = null;
+		String[] patharray = file_rpath.split("/");
+		String file_name = patharray[patharray.length];
 		String file_path = createFile(fid, file_name, file_content);
 		if (file_path != null) {
+			int oldCid = fsdb.getLastChangeID(fid);
 			String hash = Tools.hashContent(file_content);
 			String datetime = LocalDateTime.now().toString();
 			String dbResult = fsdb.addChange(fid, datetime, hash, owner,
 					message, file_path);
+			Logger.logINFO(dbResult);
+			int cid = fsdb.getChangeID(hash);
+			dbResult = pdb.changeVersionToProject(pid, cid, oldCid);
 			Logger.logINFO(dbResult);
 			result = Messages.File_added;
 		}
@@ -80,10 +87,12 @@ public class FileSystem {
 	}
 
 	public byte[] getLastVersion(int fid) {
-		byte[] file_content = null;
 		String path = fsdb.getLastChangePath(fid);
+		byte[] file_content = null;
 		try {
-			FileInputStream fis = new FileInputStream(path);
+			File file = new File(path);
+			FileInputStream fis = new FileInputStream(file);
+			file_content = new byte[(int) file.length()];
 			fis.read(file_content);
 			fis.close();
 		} catch (IOException e) {

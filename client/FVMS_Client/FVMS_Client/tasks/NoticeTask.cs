@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FVMS_Client.tasks
 {
-    public class NoticeTask : Task
+    public abstract class NoticeTask : Task
     {
         public NoticeTask(String queue)
             : base(queue)

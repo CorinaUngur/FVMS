@@ -8,13 +8,13 @@ import connection.Connector;
 
 public class LogOutTask extends NoticeTask{
 
-	public LogOutTask(QueueingConsumer loginQ, Connector conn) {
-		super(loginQ, conn);
+	public LogOutTask(QueueingConsumer logoutQ) {
+		super(logoutQ);
 	}
 
 	@Override
 	protected void executeRequest(HashMap<String, Object> request) {
-		int uid = (int) request.get("uid");
+		int uid = Integer.valueOf(request.get("uid").toString());
 		Connector.getLoggedusers().remove(uid);
 		
 	}
