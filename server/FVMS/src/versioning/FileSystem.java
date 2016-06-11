@@ -14,6 +14,7 @@ import db.FileSystemDB;
 import db.ProjectsDB;
 
 public class FileSystem {
+	private static final String pathSeparator = "/";
 	private FileSystemDB fsdb = FileSystemDB.getInstance();
 	private ProjectsDB pdb = ProjectsDB.getInstance();
 
@@ -36,16 +37,21 @@ public class FileSystem {
 				result = Messages.Folder_creationFailed.toString();
 			}
 		} else {
+			result = addFileToProject(file_rpath, pid, hash);
+		}
+		return result;
+	}
 
-			boolean fileExistsInProjects = fsdb.isFileInProject(hash,
-					file_rpath);
-			if (!fileExistsInProjects) {
-				int fid = fsdb.getChangeID(hash);
-				pdb.addFile_toProject(pid, fid, file_rpath);
-				result = Messages.File_boundToProject.toString();
-			} else {
-				result = Messages.FileAlreadyExists.toString();
-			}
+	private String addFileToProject(String file_rpath, int pid, String hash) {
+		String result;
+		boolean fileExistsInProjects = fsdb.isFileInProject(hash,
+				file_rpath);
+		if (!fileExistsInProjects) {
+			int fid = fsdb.getChangeID(hash);
+			pdb.addFile_toProject(pid, fid, file_rpath);
+			result = Messages.File_boundToProject.toString();
+		} else {
+			result = Messages.FileAlreadyExists.toString();
 		}
 		return result;
 	}
@@ -67,7 +73,7 @@ public class FileSystem {
 	public String addChange(int fid, int pid, String owner,
 			byte[] file_content, String file_rpath, String message) {
 		Messages result = null;
-		String[] patharray = file_rpath.split("/");
+		String[] patharray = file_rpath.split(pathSeparator);
 		String file_name = patharray[patharray.length];
 		String file_path = createFile(fid, file_name, file_content);
 		if (file_path != null) {
@@ -179,7 +185,7 @@ public class FileSystem {
 	}
 
 	public String getFileFolder(File source, int id) {
-		return source.getPath() + "/" + id;
+		return source.getPath() + pathSeparator + id;
 	}
 
 	private String moveAllFiles(File source, File dest) {
@@ -200,26 +206,13 @@ public class FileSystem {
 		if (folder.isDirectory()) {
 			dest.mkdir();
 			if (dest.exists()) {
-				File fileFolderInDest = new File(dest.getPath() + "/"
-						+ folder.getName());
-				fileFolderInDest.mkdir();
-				if (fileFolderInDest.exists()) {
-					for (String file_name : folder.list()) {
-						String file_path = folder.getPath() + "/" + file_name;
-						File file = new File(file_path);
-						boolean fileMoved = file.renameTo(new File(
-								fileFolderInDest.getPath() + "/" + file_name));
-						filesMoved += fileMoved ? 1 : 0;
-					}
-					Logger.logINFO(filesMoved + " out of " + toalFilesNo
-							+ " moved from " + source.getPath() + " to "
-							+ dest.getPath() + " for file id: "
-							+ Integer.valueOf(folder.getName()));
+				filesMoved = moveFolder(folder, source, dest);
+				Logger.logINFO(filesMoved + " out of " + toalFilesNo
+						+ " moved from " + source.getPath() + " to "
+						+ dest.getPath() + " for file id: "
+						+ Integer.valueOf(folder.getName()));
 
-					fsdb.moveFileToTrash(Integer.valueOf(folder.getName()));
-					result = Messages.File_removed.toString();
-				}
-
+				result = Messages.File_removed.toString();
 			} else {
 				Logger.logWARNING("Folder was not created in trash. Moving files will not be performed");
 				result = Messages.File_removingFailed.toString();
@@ -227,6 +220,28 @@ public class FileSystem {
 			folder.delete();
 		}
 		return result;
+	}
+
+	private int moveFolder(File folder, File source, File dest) {
+		int filesMoved = 0;
+		File fileFolderInDest = new File(dest.getPath() + pathSeparator
+				+ folder.getName());
+		fileFolderInDest.mkdir();
+		if (fileFolderInDest.exists()) {
+			for (String file_name : folder.list()) {
+				filesMoved += moveFile(folder, fileFolderInDest,
+						file_name);
+			}
+		}
+		return filesMoved;
+	}
+
+	private int moveFile(File folder, File fileFolderInDest, String file_name) {
+		String file_path = folder.getPath() + pathSeparator + file_name;
+		File file = new File(file_path);
+		boolean fileMoved = file.renameTo(new File(fileFolderInDest.getPath()
+				+ pathSeparator + file_name));
+		return fileMoved ? 1 : 0;
 	}
 
 	private String createFolder(int fid) {
@@ -249,31 +264,40 @@ public class FileSystem {
 
 	private String createFile(int fid, String file_rPath, byte[] file_content) {
 		String file_name = "";
-		if (file_rPath.contains("/")) {
-			file_name = file_rPath.split("/")[file_rPath.split("/").length - 1];
-		} else {
-			file_name = file_rPath.split("\\\\")[file_rPath.split("\\\\").length - 1];
-		}
+		file_name = getNameFromPath(file_rPath);
+
 		file_name = Tools.getDateTimeNow() + " " + file_name;
-		String file_path = Settings.FS_ROOTFOLDER + fid + "/" + file_name;
-		FileOutputStream fos;
+		String file_path = Settings.FS_ROOTFOLDER + fid + pathSeparator
+				+ file_name;
 		boolean file_created = false;
+		file_created = writeContent(file_content, file_path);
+		Logger.logINFO(Messages.File_added.toString());
+		return file_created ? file_path : null;
+	}
+
+	private String getNameFromPath(String path) {
+		String[] names = path.replace('\\', '/').split("/");
+		return names[names.length];
+	}
+
+	private boolean writeContent(byte[] file_content, String file_path) {
+		FileOutputStream fos;
 		try {
 			File file = new File(file_path);
-			file_created = file.createNewFile();
-			if (file_created) {
+			if (file.createNewFile()) {
 				fos = new FileOutputStream(file);
 				fos.write(file_content);
 				fos.flush();
 				fos.close();
-				Logger.logINFO(Messages.File_added.toString());
+
+				return true;
 			} else {
 				Logger.logINFO(Messages.File_addingFailed.toString());
+				return false;
 			}
 		} catch (IOException e) {
-			Logger.logERROR(e);
+			Logger.logERROR(e, "Writing contet to file failed for file.");
+			return false;
 		}
-
-		return file_created ? file_path : null;
 	}
 }
