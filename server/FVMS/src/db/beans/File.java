@@ -4,6 +4,7 @@ public class File {
 	private int id = 0;
 	private int pid = 0;
 	private String path = null;
+	@SuppressWarnings("unused")
 	private String name = null;
 
 	public void setName(String name) {
