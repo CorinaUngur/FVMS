@@ -73,8 +73,7 @@ public class FileSystem {
 	public String addChange(int fid, int pid, String owner,
 			byte[] file_content, String file_rpath, String message) {
 		Messages result = null;
-		String[] patharray = file_rpath.split(pathSeparator);
-		String file_name = patharray[patharray.length];
+		String file_name = getNameFromPath(file_rpath);
 		String file_path = createFile(fid, file_name, file_content);
 		if (file_path != null) {
 			int oldCid = fsdb.getLastChangeID(fid);
@@ -277,7 +276,7 @@ public class FileSystem {
 
 	private String getNameFromPath(String path) {
 		String[] names = path.replace('\\', '/').split("/");
-		return names[names.length];
+		return names[names.length-1];
 	}
 
 	private boolean writeContent(byte[] file_content, String file_path) {
