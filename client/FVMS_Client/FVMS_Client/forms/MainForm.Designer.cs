@@ -34,29 +34,29 @@ namespace FVMS_Client.forms
             this.menu_panel = new System.Windows.Forms.Panel();
             this.collapseButton = new System.Windows.Forms.Button();
             this.expandButton = new System.Windows.Forms.Button();
-            this.refreshButton = new System.Windows.Forms.Button();
             this.foldersTree = new System.Windows.Forms.TreeView();
             this.helloLabel = new System.Windows.Forms.Label();
             this.nameLabel = new System.Windows.Forms.Label();
-            this.logoutButton = new System.Windows.Forms.Button();
             this.filesGridPannel = new System.Windows.Forms.Panel();
             this.filesGrid = new System.Windows.Forms.DataGridView();
             this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.subsolTabControl = new System.Windows.Forms.TabControl();
+            this.CommentPage = new System.Windows.Forms.TabPage();
+            this.commentLabel = new System.Windows.Forms.Label();
+            this.historyPage = new System.Windows.Forms.TabPage();
+            this.historyGrid = new System.Windows.Forms.DataGridView();
+            this.logoutButton = new System.Windows.Forms.Button();
+            this.addFileButton = new System.Windows.Forms.Button();
+            this.deleteFileButton = new System.Windows.Forms.Button();
+            this.refreshButton = new System.Windows.Forms.Button();
             this.fileStatusDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.nameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lastModifiedDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.authNameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lastCommentDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.fileBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.addFileButton = new System.Windows.Forms.Button();
-            this.deleteFileButton = new System.Windows.Forms.Button();
-            this.downloadFileButton = new System.Windows.Forms.Button();
             this.saveFilesButton = new System.Windows.Forms.Button();
-            this.subsolTabControl = new System.Windows.Forms.TabControl();
-            this.CommentPage = new System.Windows.Forms.TabPage();
-            this.commentLabel = new System.Windows.Forms.Label();
-            this.historyPage = new System.Windows.Forms.TabPage();
-            this.historyGrid = new System.Windows.Forms.DataGridView();
+            this.downloadFileButton = new System.Windows.Forms.Button();
             this.idDataGridHistoryColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.nameDataGridHistoryColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.authNameDataGridHistoryColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -65,11 +65,11 @@ namespace FVMS_Client.forms
             this.menu_panel.SuspendLayout();
             this.filesGridPannel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.filesGrid)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.fileBindingSource)).BeginInit();
             this.subsolTabControl.SuspendLayout();
             this.CommentPage.SuspendLayout();
             this.historyPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.historyGrid)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.fileBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // menu_panel
@@ -78,7 +78,7 @@ namespace FVMS_Client.forms
             this.menu_panel.Controls.Add(this.expandButton);
             this.menu_panel.Controls.Add(this.refreshButton);
             this.menu_panel.Controls.Add(this.foldersTree);
-            this.menu_panel.Location = new System.Drawing.Point(0, 41);
+            this.menu_panel.Location = new System.Drawing.Point(0, 48);
             this.menu_panel.Name = "menu_panel";
             this.menu_panel.Size = new System.Drawing.Size(201, 503);
             this.menu_panel.TabIndex = 0;
@@ -103,24 +103,14 @@ namespace FVMS_Client.forms
             this.expandButton.UseVisualStyleBackColor = true;
             this.expandButton.Click += new System.EventHandler(this.expandButton_Click);
             // 
-            // refreshButton
-            // 
-            this.refreshButton.BackgroundImage = global::FVMS_Client.Properties.Resources.ie_refresh_button;
-            this.refreshButton.Location = new System.Drawing.Point(3, -1);
-            this.refreshButton.Name = "refreshButton";
-            this.refreshButton.Size = new System.Drawing.Size(22, 22);
-            this.refreshButton.TabIndex = 3;
-            this.refreshButton.UseVisualStyleBackColor = true;
-            this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
-            // 
             // foldersTree
             // 
+            this.foldersTree.HideSelection = false;
             this.foldersTree.Location = new System.Drawing.Point(3, 21);
             this.foldersTree.Name = "foldersTree";
             this.foldersTree.Size = new System.Drawing.Size(194, 478);
             this.foldersTree.TabIndex = 2;
             this.foldersTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.foldersTree_AfterSelect);
-            this.foldersTree.HideSelection = false;
             // 
             // helloLabel
             // 
@@ -143,21 +133,11 @@ namespace FVMS_Client.forms
             this.nameLabel.TabIndex = 4;
             this.nameLabel.Text = "buddy";
             // 
-            // logoutButton
-            // 
-            this.logoutButton.BackgroundImage = global::FVMS_Client.Properties.Resources.logout;
-            this.logoutButton.Location = new System.Drawing.Point(939, 2);
-            this.logoutButton.Name = "logoutButton";
-            this.logoutButton.Size = new System.Drawing.Size(33, 36);
-            this.logoutButton.TabIndex = 0;
-            this.logoutButton.UseVisualStyleBackColor = true;
-            this.logoutButton.Click += new System.EventHandler(this.logOutButton_Click);
-            // 
             // filesGridPannel
             // 
             this.filesGridPannel.BackColor = System.Drawing.SystemColors.Control;
             this.filesGridPannel.Controls.Add(this.filesGrid);
-            this.filesGridPannel.Location = new System.Drawing.Point(203, 41);
+            this.filesGridPannel.Location = new System.Drawing.Point(203, 48);
             this.filesGridPannel.Name = "filesGridPannel";
             this.filesGridPannel.Size = new System.Drawing.Size(769, 355);
             this.filesGridPannel.TabIndex = 0;
@@ -196,93 +176,11 @@ namespace FVMS_Client.forms
             this.id.ReadOnly = true;
             this.id.Visible = false;
             // 
-            // fileStatusDataGridViewTextBoxColumn
-            // 
-            this.fileStatusDataGridViewTextBoxColumn.DataPropertyName = "fileStatus";
-            this.fileStatusDataGridViewTextBoxColumn.HeaderText = "Status";
-            this.fileStatusDataGridViewTextBoxColumn.Name = "fileStatusDataGridViewTextBoxColumn";
-            this.fileStatusDataGridViewTextBoxColumn.ReadOnly = true;
-            this.fileStatusDataGridViewTextBoxColumn.Width = 80;
-            // 
-            // nameDataGridViewTextBoxColumn
-            // 
-            this.nameDataGridViewTextBoxColumn.DataPropertyName = "name";
-            this.nameDataGridViewTextBoxColumn.HeaderText = "Name";
-            this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
-            this.nameDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // lastModifiedDataGridViewTextBoxColumn
-            // 
-            this.lastModifiedDataGridViewTextBoxColumn.DataPropertyName = "lastModified";
-            this.lastModifiedDataGridViewTextBoxColumn.HeaderText = "Last Modification Time";
-            this.lastModifiedDataGridViewTextBoxColumn.Name = "lastModifiedDataGridViewTextBoxColumn";
-            this.lastModifiedDataGridViewTextBoxColumn.ReadOnly = true;
-            this.lastModifiedDataGridViewTextBoxColumn.Width = 140;
-            // 
-            // authNameDataGridViewTextBoxColumn
-            // 
-            this.authNameDataGridViewTextBoxColumn.DataPropertyName = "authName";
-            this.authNameDataGridViewTextBoxColumn.HeaderText = "Author";
-            this.authNameDataGridViewTextBoxColumn.Name = "authNameDataGridViewTextBoxColumn";
-            this.authNameDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // lastCommentDataGridViewTextBoxColumn
-            // 
-            this.lastCommentDataGridViewTextBoxColumn.DataPropertyName = "lastComment";
-            this.lastCommentDataGridViewTextBoxColumn.HeaderText = "Comment on last change";
-            this.lastCommentDataGridViewTextBoxColumn.Name = "lastCommentDataGridViewTextBoxColumn";
-            this.lastCommentDataGridViewTextBoxColumn.ReadOnly = true;
-            this.lastCommentDataGridViewTextBoxColumn.Width = 355;
-            // 
-            // fileBindingSource
-            // 
-            this.fileBindingSource.DataSource = typeof(FVMS_Client.files.File);
-            // 
-            // addFileButton
-            // 
-            this.addFileButton.Location = new System.Drawing.Point(96, 2);
-            this.addFileButton.Name = "addFileButton";
-            this.addFileButton.Size = new System.Drawing.Size(44, 36);
-            this.addFileButton.TabIndex = 4;
-            this.addFileButton.Text = "Add";
-            this.addFileButton.UseVisualStyleBackColor = true;
-            this.addFileButton.Click += new System.EventHandler(this.addFileButton_Click);
-            // 
-            // deleteFileButton
-            // 
-            this.deleteFileButton.Location = new System.Drawing.Point(143, 2);
-            this.deleteFileButton.Name = "deleteFileButton";
-            this.deleteFileButton.Size = new System.Drawing.Size(44, 36);
-            this.deleteFileButton.TabIndex = 3;
-            this.deleteFileButton.Text = "Delete";
-            this.deleteFileButton.UseVisualStyleBackColor = true;
-            this.deleteFileButton.Click += new System.EventHandler(this.deleteFileButton_Click);
-            // 
-            // downloadFileButton
-            // 
-            this.downloadFileButton.Location = new System.Drawing.Point(3, 2);
-            this.downloadFileButton.Name = "downloadFileButton";
-            this.downloadFileButton.Size = new System.Drawing.Size(44, 36);
-            this.downloadFileButton.TabIndex = 2;
-            this.downloadFileButton.Text = "Get";
-            this.downloadFileButton.UseVisualStyleBackColor = true;
-            this.downloadFileButton.Click += new System.EventHandler(this.downloadFileButton_Click);
-            // 
-            // saveFilesButton
-            // 
-            this.saveFilesButton.Location = new System.Drawing.Point(50, 2);
-            this.saveFilesButton.Name = "saveFilesButton";
-            this.saveFilesButton.Size = new System.Drawing.Size(44, 36);
-            this.saveFilesButton.TabIndex = 1;
-            this.saveFilesButton.Text = "Save";
-            this.saveFilesButton.UseVisualStyleBackColor = true;
-            this.saveFilesButton.Click += new System.EventHandler(this.saveFilesButton_Click);
-            // 
             // subsolTabControl
             // 
             this.subsolTabControl.Controls.Add(this.CommentPage);
             this.subsolTabControl.Controls.Add(this.historyPage);
-            this.subsolTabControl.Location = new System.Drawing.Point(203, 396);
+            this.subsolTabControl.Location = new System.Drawing.Point(203, 409);
             this.subsolTabControl.Name = "subsolTabControl";
             this.subsolTabControl.SelectedIndex = 0;
             this.subsolTabControl.Size = new System.Drawing.Size(769, 148);
@@ -340,6 +238,108 @@ namespace FVMS_Client.forms
             this.historyGrid.Size = new System.Drawing.Size(733, 119);
             this.historyGrid.TabIndex = 0;
             // 
+            // logoutButton
+            // 
+            this.logoutButton.BackgroundImage = global::FVMS_Client.Properties.Resources.logout;
+            this.logoutButton.Location = new System.Drawing.Point(939, 2);
+            this.logoutButton.Name = "logoutButton";
+            this.logoutButton.Size = new System.Drawing.Size(33, 36);
+            this.logoutButton.TabIndex = 0;
+            this.logoutButton.UseVisualStyleBackColor = true;
+            this.logoutButton.Click += new System.EventHandler(this.logOutButton_Click);
+            // 
+            // addFileButton
+            // 
+            this.addFileButton.BackgroundImage = global::FVMS_Client.Properties.Resources.add_button;
+            this.addFileButton.Location = new System.Drawing.Point(102, 2);
+            this.addFileButton.Name = "addFileButton";
+            this.addFileButton.Size = new System.Drawing.Size(52, 45);
+            this.addFileButton.TabIndex = 4;
+            this.addFileButton.UseVisualStyleBackColor = true;
+            this.addFileButton.Click += new System.EventHandler(this.addFileButton_Click);
+            // 
+            // deleteFileButton
+            // 
+            this.deleteFileButton.BackgroundImage = global::FVMS_Client.Properties.Resources.delete;
+            this.deleteFileButton.Location = new System.Drawing.Point(153, 2);
+            this.deleteFileButton.Name = "deleteFileButton";
+            this.deleteFileButton.Size = new System.Drawing.Size(44, 45);
+            this.deleteFileButton.TabIndex = 3;
+            this.deleteFileButton.UseVisualStyleBackColor = true;
+            this.deleteFileButton.Click += new System.EventHandler(this.deleteFileButton_Click);
+            // 
+            // refreshButton
+            // 
+            this.refreshButton.BackgroundImage = global::FVMS_Client.Properties.Resources.ie_refresh_button;
+            this.refreshButton.Location = new System.Drawing.Point(3, -1);
+            this.refreshButton.Name = "refreshButton";
+            this.refreshButton.Size = new System.Drawing.Size(22, 22);
+            this.refreshButton.TabIndex = 3;
+            this.refreshButton.UseVisualStyleBackColor = true;
+            this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
+            // 
+            // fileStatusDataGridViewTextBoxColumn
+            // 
+            this.fileStatusDataGridViewTextBoxColumn.DataPropertyName = "fileStatus";
+            this.fileStatusDataGridViewTextBoxColumn.HeaderText = "Status";
+            this.fileStatusDataGridViewTextBoxColumn.Name = "fileStatusDataGridViewTextBoxColumn";
+            this.fileStatusDataGridViewTextBoxColumn.ReadOnly = true;
+            this.fileStatusDataGridViewTextBoxColumn.Width = 80;
+            // 
+            // nameDataGridViewTextBoxColumn
+            // 
+            this.nameDataGridViewTextBoxColumn.DataPropertyName = "name";
+            this.nameDataGridViewTextBoxColumn.HeaderText = "Name";
+            this.nameDataGridViewTextBoxColumn.Name = "nameDataGridViewTextBoxColumn";
+            this.nameDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // lastModifiedDataGridViewTextBoxColumn
+            // 
+            this.lastModifiedDataGridViewTextBoxColumn.DataPropertyName = "lastModified";
+            this.lastModifiedDataGridViewTextBoxColumn.HeaderText = "Last Modification Time";
+            this.lastModifiedDataGridViewTextBoxColumn.Name = "lastModifiedDataGridViewTextBoxColumn";
+            this.lastModifiedDataGridViewTextBoxColumn.ReadOnly = true;
+            this.lastModifiedDataGridViewTextBoxColumn.Width = 140;
+            // 
+            // authNameDataGridViewTextBoxColumn
+            // 
+            this.authNameDataGridViewTextBoxColumn.DataPropertyName = "authName";
+            this.authNameDataGridViewTextBoxColumn.HeaderText = "Author";
+            this.authNameDataGridViewTextBoxColumn.Name = "authNameDataGridViewTextBoxColumn";
+            this.authNameDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // lastCommentDataGridViewTextBoxColumn
+            // 
+            this.lastCommentDataGridViewTextBoxColumn.DataPropertyName = "lastComment";
+            this.lastCommentDataGridViewTextBoxColumn.HeaderText = "Comment on last change";
+            this.lastCommentDataGridViewTextBoxColumn.Name = "lastCommentDataGridViewTextBoxColumn";
+            this.lastCommentDataGridViewTextBoxColumn.ReadOnly = true;
+            this.lastCommentDataGridViewTextBoxColumn.Width = 355;
+            // 
+            // fileBindingSource
+            // 
+            this.fileBindingSource.DataSource = typeof(FVMS_Client.files.File);
+            // 
+            // saveFilesButton
+            // 
+            this.saveFilesButton.BackgroundImage = global::FVMS_Client.Properties.Resources.button;
+            this.saveFilesButton.Location = new System.Drawing.Point(50, 2);
+            this.saveFilesButton.Name = "saveFilesButton";
+            this.saveFilesButton.Size = new System.Drawing.Size(52, 45);
+            this.saveFilesButton.TabIndex = 1;
+            this.saveFilesButton.UseVisualStyleBackColor = true;
+            this.saveFilesButton.Click += new System.EventHandler(this.saveFilesButton_Click);
+            // 
+            // downloadFileButton
+            // 
+            this.downloadFileButton.BackgroundImage = global::FVMS_Client.Properties.Resources.button__1_;
+            this.downloadFileButton.Location = new System.Drawing.Point(3, 2);
+            this.downloadFileButton.Name = "downloadFileButton";
+            this.downloadFileButton.Size = new System.Drawing.Size(50, 45);
+            this.downloadFileButton.TabIndex = 2;
+            this.downloadFileButton.UseVisualStyleBackColor = true;
+            this.downloadFileButton.Click += new System.EventHandler(this.downloadFileButton_Click);
+            // 
             // idDataGridHistoryColumn
             // 
             this.idDataGridHistoryColumn.DataPropertyName = "id";
@@ -382,7 +382,7 @@ namespace FVMS_Client.forms
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(979, 556);
+            this.ClientSize = new System.Drawing.Size(971, 557);
             this.Controls.Add(this.helloLabel);
             this.Controls.Add(this.logoutButton);
             this.Controls.Add(this.nameLabel);
@@ -398,12 +398,12 @@ namespace FVMS_Client.forms
             this.menu_panel.ResumeLayout(false);
             this.filesGridPannel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.filesGrid)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.fileBindingSource)).EndInit();
             this.subsolTabControl.ResumeLayout(false);
             this.CommentPage.ResumeLayout(false);
             this.CommentPage.PerformLayout();
             this.historyPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.historyGrid)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.fileBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
