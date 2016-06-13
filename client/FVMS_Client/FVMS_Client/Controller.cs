@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FVMS_Client.tasks;
+using FVMS_Client.files;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace FVMS_Client
 {
@@ -81,5 +83,43 @@ namespace FVMS_Client
             }
         }
 
+        public void consumeFile(string Queue, int noOfBlocks, string hash, File file){
+            QueueingBasicConsumer fileConsumer = new QueueingBasicConsumer(channel);
+            channel.BasicConsume(queue: Queue,
+                                 noAck: true,
+                                 consumer: fileConsumer);
+            for (int i = 0; i < noOfBlocks; i++)
+            {
+                var ea = (BasicDeliverEventArgs)fileConsumer.Queue.Dequeue();
+                Dictionary<string, object> blockInfo = JSONManipulator.getResponseDictionary(ea.Body);
+                object content;
+                blockInfo.TryGetValue("fileBlock", out content);
+                
+                file.appendContent(ObjectToByteArray(content));
+            }
+            if (file.checkContent(hash))
+            {
+                //Do something here
+            }
+        }
+
+        private static byte[] ObjectToByteArray(Object obj)
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            using (var ms = new System.IO.MemoryStream())
+            {
+                bf.Serialize(ms, obj);
+                return ms.ToArray();
+            }
+        }
+        internal Dictionary<string, object> ConsumeOneMessage(string Queue)
+        {
+            QueueingBasicConsumer fileConsumer = new QueueingBasicConsumer(channel);
+            channel.BasicConsume(queue: Queue,
+                                 noAck: true,
+                                 consumer: fileConsumer);
+            var ea = (BasicDeliverEventArgs)fileConsumer.Queue.Dequeue();
+            return JSONManipulator.getResponseDictionary(ea.Body);
+        }
     }
 }

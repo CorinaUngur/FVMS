@@ -65,4 +65,5 @@ public class Settings {
 	public static String LOGGER_WRITER="console";
 	public static String CONN_QUPLOAD = "QSaveChanges";
 	public static String CONN_QDOWNLOAD = "QDownload";
+	public static String Conn_QFILEDOWNLOAD = "QFileDownload";
 }

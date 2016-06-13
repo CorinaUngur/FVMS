@@ -4,30 +4,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FVMS_Client.tasks
 {
-    class DownloadFileTask : RequestTask
+    class DownloadFilesTask : NoticeTask
     {
-        List<File> files;
-        string path;
-        public DownloadFileTask(List<File> files, String path) : base(Queues.QDownload)
+        private List<File> files;
+        private string path;
+        public DownloadFilesTask(List<File> files, String path)
+            : base(Queues.QDownload)
         {
             this.files = files;
             this.path = path;
-        }
-        public override void treatResponse(Dictionary<string, object> response)
-        {
-            Object contents;
-            response.TryGetValue("contents", out contents);
-            Dictionary<int, byte[]> filesContents = JSONManipulator.DeserializeDict<byte[]>(contents.ToString());
-            foreach(File f in files)
-            {
-                byte[] outParam;
-                filesContents.TryGetValue(f.id, out outParam);
-                f.setFileOnDisk(path + "/" + f.name, outParam);
-            }
         }
 
         public override Dictionary<string, object> prepareMessage()
@@ -41,7 +31,15 @@ namespace FVMS_Client.tasks
             }
             message.Add("fids", filesIDs);
             message.Add("uid", LoggedUser.uid);
-            message.Add("pid", pid); 
+            message.Add("pid", pid);
+            foreach (File f in files)
+            {
+                Thread thread = new Thread(delegate()
+                {
+                    (new DownloadOnThreadsTask(f, path + "/" + f.name)).execute();
+                });
+                thread.Start();
+            }
             return message;
 
         }

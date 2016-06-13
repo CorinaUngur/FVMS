@@ -7,8 +7,8 @@ import utils.Logger;
 import com.rabbitmq.client.QueueingConsumer;
 
 public abstract class RequestTask extends Task {
-	public RequestTask(QueueingConsumer loginQ) {
-		super(loginQ);
+	public RequestTask(QueueingConsumer queue) {
+		super(queue);
 	}
 
 	@Override

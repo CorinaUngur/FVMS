@@ -91,6 +91,10 @@ public class StatementExecutor {
 		
 		return rows_affected;
 	}
+	public StatementExecutor and(){
+		statement += " AND ";
+		return this;
+	}
 	private String toString(Object object) {
 		if (object instanceof String) {
 			return "\"" + object + "\"";

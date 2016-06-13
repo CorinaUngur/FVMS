@@ -21,10 +21,6 @@ namespace FVMS_Client.tasks
         {
             Dictionary<string, object> response = new Dictionary<string, object>();
             int pid = files.First().pid;
-            foreach (File f in files)
-            {
-                f.createContent();
-            }
             response.Add("files", files);
             response.Add("uid", LoggedUser.uid);
             response.Add("pid", pid);
@@ -36,11 +32,20 @@ namespace FVMS_Client.tasks
         {
             object outobj;
             response.TryGetValue("authorized",out outobj);
+            object newFiles;
+            response.TryGetValue("newfiles", out newFiles);
+            Dictionary<string, int> newFilesNames = JSONManipulator.DeserializeDict<String, int>(newFiles.ToString());
             int authorized = Int32.Parse(outobj.ToString());
             if (authorized==1)
             {
                 foreach (File f in files)
                 {
+                    if (newFilesNames.Keys.Contains(f.path))
+                    {
+                        int fid;
+                        newFilesNames.TryGetValue(f.path, out fid);
+                        f.id = fid;
+                    }
                     f.fileStatus = FileStatus.UPTODATE;
                 }
             }

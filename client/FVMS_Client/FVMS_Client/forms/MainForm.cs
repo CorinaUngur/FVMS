@@ -20,6 +20,7 @@ namespace FVMS_Client.forms
         public MainForm()
         {
             InitializeComponent();
+            nameLabel.Text = LoggedUser.Name;
         }
         public void GenerateTree(List<Folder> rootFolders)
         {
@@ -91,6 +92,7 @@ namespace FVMS_Client.forms
 
         private void refreshButton_Click(object sender, EventArgs e)
         {
+            foldersTree.Nodes.Clear();
             Controller.getInstance().Init();
         }
 
@@ -196,12 +198,12 @@ namespace FVMS_Client.forms
                     popup.ShowDialog();
                     if (!popup.Canceled)
                     {
-                        (new DownloadFileTask(filesToChange, path)).execute();
+                        (new DownloadFilesTask(filesToChange, path)).execute();
                     }
                 }
                 else
                 {
-                    (new DownloadFileTask(filesToChange, path)).execute();
+                    (new DownloadFilesTask(filesToChange, path)).execute();
                 }
             }
         }
@@ -275,7 +277,17 @@ namespace FVMS_Client.forms
                 String[] filesToAdd = openFileDialog.FileNames;
                 foreach (String file_name in filesToAdd)
                 {
-                    File file = new File.FileInFolder(folder.pid, folder.path, file_name, LoggedUser.Name);
+                    string path;
+                    if (folder.path.Equals(folder.name))
+                    {
+                        path = "";
+                    }
+                    else
+                    {
+                        path = folder.path.Substring(folder.name.Length - 1);
+                    }
+                    
+                    File file = new File.FileInFolder(folder.pid, path, file_name, LoggedUser.Name);
                     folder.addFile(file);
                     filesGrid.DataSource = folder.GetFiles();
                 }

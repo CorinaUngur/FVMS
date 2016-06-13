@@ -86,7 +86,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="tasks\DownloadFileTask.cs" />
+    <Compile Include="tasks\DownloadFilesTask.cs" />
+    <Compile Include="tasks\DownloadOnThreadsTask.cs" />
     <Compile Include="tasks\GetHistoryTask.cs" />
     <Compile Include="tasks\InitTask.cs" />
     <Compile Include="tasks\LoginTask.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="tasks\Task.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="files\FileStatus.cs" />
+    <Compile Include="tools\FileBlockMessage.cs" />
     <Compile Include="tools\Messages.cs" />
     <Compile Include="tools\JSONManipulator.cs" />
     <Compile Include="tools\LoggedUser.cs" />

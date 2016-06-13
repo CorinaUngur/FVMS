@@ -4,37 +4,43 @@ import java.util.HashMap;
 import java.util.List;
 
 import utils.JSONManipulator;
-import versioning.FileSystem;
 
 import com.rabbitmq.client.QueueingConsumer;
 
+import config.Settings;
+import connection.Connector;
+import connection.tools.SendFileDetails;
+import db.FileSystemDB;
 import db.PermissionsDB;
+import db.ProjectsDB;
 import db.tools.Permissions;
 
-public class DownloadTask extends RequestTask {
+public class DownloadTask extends NoticeTask {
 
 	public DownloadTask(QueueingConsumer queue) {
 		super(queue);
 	}
 
 	@Override
-	protected HashMap<String, Object> getResponse(
-			HashMap<String, Object> request) {
-		HashMap<String, Object> response = new HashMap<String, Object>();
+	protected void executeRequest(HashMap<String, Object> request) {
 		int uid = Integer.valueOf(request.get("uid").toString());
 		int pid = Integer.valueOf(request.get("pid").toString());
-		FileSystem fs = new FileSystem();
 		if (PermissionsDB.getInstance().hasPermission_onProject(uid, pid,
-				Permissions.READ)){
-			List<Integer> fileIDs = JSONManipulator.deserializeList(request.get("fids").toString());
-			HashMap<Integer, byte[]> contents = new HashMap<Integer, byte[]>();
-			for(int i : fileIDs){
-				contents.put(i, fs.getLastVersion(i));
+				Permissions.READ)) {
+			List<Integer> fileIDs = JSONManipulator.deserializeList(request
+					.get("fids").toString());
+			for (int id : fileIDs) {
+				HashMap<String, Object> response = new DownloadOnThreadsTask().execute(uid, id, pid);
+				Connector.getInstance().sentMessage(
+						Settings.Conn_QFILEDOWNLOAD, response);
+				int cid = ProjectsDB.getInstance().getChangeID(id, pid);
+				String path = FileSystemDB.getInstance().getFilePath(cid);
+				Connector.getInstance().startSedingFileTask(
+						new SendFileDetails(path, response.get("queue").toString()));
 			}
-			response.put("contents", contents);
+			
 		}
-		
-		return response;
+
 	}
 
 }

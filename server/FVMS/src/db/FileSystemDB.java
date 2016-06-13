@@ -309,4 +309,30 @@ public class FileSystemDB {
 		return result;
 	}
 
+	public String getFilePath(int cid) {
+		String statement = "SELECT " + Columns.Changes_Path + " FROM " + Tables.CHANGES + " WHERE " + Columns.Changes_ID + "=" + cid;
+		ResultSet rs = db.executeStatement(statement);
+		try {
+			if(rs.first()){
+				return rs.getString(Columns.Changes_Path.toString());
+			}
+		} catch (SQLException e) {
+			Logger.logERROR(e, statement);
+		}
+		return null;
+	}
+
+	public String getHash(int cid) {
+		String statement = "SELECT " + Columns.Changes_Hash + " FROM " + Tables.CHANGES + " WHERE " + Columns.Changes_ID + "=" + cid;
+		ResultSet rs = db.executeStatement(statement);
+		try {
+			if(rs.first()){
+				return rs.getString(Columns.Changes_Hash.toString());
+			}
+		} catch (SQLException e) {
+			Logger.logERROR(e, statement);
+		}
+		return null;
+	}
+
 }

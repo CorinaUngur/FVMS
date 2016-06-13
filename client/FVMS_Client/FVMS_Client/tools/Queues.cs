@@ -14,5 +14,6 @@ namespace FVMS_Client.tools
         public static string QLogout = "QLogout";
         public static string QSaveChanges = "QUpload";
         public static string QDownload = "QDownload";
+        public static string QFileDownload = "QFileDownload";
     }
 }

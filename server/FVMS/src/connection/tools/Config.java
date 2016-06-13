@@ -2,7 +2,9 @@ package connection.tools;
 
 public enum Config {
 	
-	MessageExpirationTime(60*1000);
+	MessageExpirationTime(60*1000),
+	FileBlockSize(60000);
+	//(1);
 	
 	private String value;
 	private int intValue;

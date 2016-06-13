@@ -17,8 +17,8 @@ public abstract class Task implements Runnable {
 
 	private Connector conn = null;
 
-	public Task(QueueingConsumer loginQ) {
-		this.queue = loginQ;
+	public Task(QueueingConsumer queue) {
+		this.queue = queue;
 		this.conn = Connector.getInstance();
 	}
 

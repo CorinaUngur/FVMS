@@ -28,7 +28,9 @@ import connection.tasks.GetHistoryTask;
 import connection.tasks.InitTask;
 import connection.tasks.LogOutTask;
 import connection.tasks.LoginTask;
+import connection.tasks.SendBlocksTask;
 import connection.tools.Config;
+import connection.tools.SendFileDetails;
 
 public class Connector {
 	private static Connector instance = null;
@@ -108,6 +110,8 @@ public class Connector {
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("x-message-ttl", Config.MessageExpirationTime.getInt());
 
+		channel.queueDeclare(Settings.Conn_QFILEDOWNLOAD, false, false, false, null);
+		
 		loginQ = startConsuming(Settings.CONN_QLOGIN, args);
 		initQ = startConsuming(Settings.CONN_QINIT, args);
 		logoutQ = startConsuming(Settings.CONN_QLOGOUT, args);
@@ -132,5 +136,30 @@ public class Connector {
 		} catch (IOException e) {
 			Logger.logERROR(e);
 		}
+	}
+
+	public void startSedingFileTask(SendFileDetails sendFileDetails) {
+		try {
+			channel.queueDeclare(sendFileDetails.queue, false, false, false, null);
+			
+		} catch (IOException e) {
+			Logger.logERROR(e);
+		}
+		threadpool.submit(new SendBlocksTask(sendFileDetails));
+	}
+
+	public void sentMessage(String queue, HashMap<String, Object> blockMessage) {
+		ObjectMapper resultMapper = new ObjectMapper();
+		byte[] bodyMessage;
+		try {
+			bodyMessage = resultMapper.writeValueAsBytes(blockMessage);
+			Logger.logINFO("Sending... " + String.valueOf(bodyMessage));
+			channel.basicPublish("", queue, null, bodyMessage);
+		} catch (JsonProcessingException e) {
+			Logger.logERROR(e);
+		} catch (IOException e) {
+			Logger.logERROR(e);
+		}
+
 	}
 }

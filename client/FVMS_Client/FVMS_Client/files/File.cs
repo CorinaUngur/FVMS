@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace FVMS_Client.files
@@ -9,15 +10,14 @@ namespace FVMS_Client.files
     public class File
     {
         public string name { get; private set; }
-        public int id { get; private set; }
+        public int id { get; set; }
         public int pid { get; private set; }
         public String path { get; private set; }
         public String lastModified { get; private set; }
         public String lastComment { get; private set; }
         public String authName { get; private set; }
-        private String boundedFilePath;
+        public String boundedFilePath;
         public FileStatus fileStatus { get; set; }
-        public byte[] file_content { get; private set; }
         private FileSystemWatcher fileWatcher;
         public File(int id, int pid, String path, String lastModified, String lastComment, String authName)
         {
@@ -52,10 +52,19 @@ namespace FVMS_Client.files
 
         private void writeFileOnDisk(byte[] file_content)
         {
-            FileStream fs = System.IO.File.Create(boundedFilePath);
-            fs.Write(file_content, 0, file_content.Count());
-            fs.Flush();
-            fs.Close();
+            try
+            {
+                System.IO.FileStream fileStream =
+                   new System.IO.FileStream(boundedFilePath, System.IO.FileMode.Create,
+                                            System.IO.FileAccess.Write);
+                fileStream.Write(file_content, 0, file_content.Length);
+                fileStream.Close();
+            }
+            catch (Exception _Exception)
+            {
+                Console.WriteLine("Exception caught in process: {0}",
+                                  _Exception.ToString());
+            }
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
@@ -75,24 +84,50 @@ namespace FVMS_Client.files
             fileStatus = FileStatus.CHANGED;
         }
 
-        internal void createContent()
-        {
-            FileStream fs = System.IO.File.OpenRead(boundedFilePath);
-            file_content = new byte[fs.Length];
-            fs.Read(file_content, 0, (int)fs.Length);
-            fs.Close();
-            //TODO Write on steps!!!!
-        }
-
         public class FileInFolder : File
         {
             public FileInFolder(int pid, String path, String filePath,  String authName) : base(0,pid, path, "","",authName)
         {
             this.name = Path.GetFileName(filePath);
-            this.path += "/" + name;
+            if (!name.Equals(path))
+            {
+                this.path += "/" + name;
+            }
             this.fileStatus = FileStatus.NEW;
             this.boundedFilePath = filePath;
         }
+        }
+
+        internal void appendContent(byte[] content)
+        {
+            sbyte[] sbt = new sbyte[content.Length];
+            Buffer.BlockCopy(content, 0, sbt, 0, content.Length);
+            try
+            {
+                using (var stream = new FileStream(boundedFilePath, FileMode.Append))
+                {
+                    BinaryWriter bw = new BinaryWriter(stream);
+                    foreach (sbyte b in sbt)
+                    {
+                        bw.Write(b);
+                    }
+
+                   // stream.Write(content, 0, content.Length);
+                }
+            }
+            catch (Exception _Exception)
+            {
+                Console.WriteLine("Exception caught in process: {0}",
+                                  _Exception.ToString());
+            }
+        }
+
+        internal bool checkContent(string hash)
+        {
+            MD5 md5 = MD5.Create();
+            FileStream stream = System.IO.File.OpenRead(boundedFilePath);
+            byte[] receivedHash = md5.ComputeHash(stream);
+            return receivedHash.Equals(hash);
         }
     }
 }

@@ -171,10 +171,9 @@ public class ProjectsDB {
 	private ResultSet getChangeDetailsRS(int currentFile_id) {
 		String statement;
 		statement = "SELECT " + Columns.Changes_date + ","
-				+ Columns.Changes_message + ","
-				+ Columns.Changes_owner + " FROM " + Tables.CHANGES
-				+ " WHERE " + Columns.Changes_ID + "="
-				+ currentFile_id;
+				+ Columns.Changes_message + "," + Columns.Changes_owner
+				+ " FROM " + Tables.CHANGES + " WHERE " + Columns.Changes_ID
+				+ "=" + currentFile_id;
 		ResultSet frs = db.executeStatement(statement);
 		return frs;
 	}
@@ -182,9 +181,8 @@ public class ProjectsDB {
 	private ResultSet getFilesDetailsRS(int pid) {
 		String statement;
 		statement = "SELECT " + Columns.ProjectFiles_RPath + ","
-				+ Columns.ProjectFiles_CID + " FROM "
-				+ Tables.PROJECT_FILES + " WHERE "
-				+ Columns.ProjectFiles_PID + "=" + pid;
+				+ Columns.ProjectFiles_CID + " FROM " + Tables.PROJECT_FILES
+				+ " WHERE " + Columns.ProjectFiles_PID + "=" + pid;
 		ResultSet prs = db.executeStatement(statement);
 		return prs;
 	}
@@ -192,8 +190,7 @@ public class ProjectsDB {
 	private String getProjectName(int pid) throws SQLException {
 		String statement;
 		statement = "SELECT " + Columns.Projects_Name + " FROM "
-				+ Tables.PROJECTS + " WHERE " + Columns.Projects_ID
-				+ "=" + pid;
+				+ Tables.PROJECTS + " WHERE " + Columns.Projects_ID + "=" + pid;
 		ResultSet nrs = db.executeStatement(statement);
 		nrs.first();
 		String name = nrs.getString(Columns.Projects_Name.toString());
@@ -216,6 +213,38 @@ public class ProjectsDB {
 		Logger.logINFO(rows_affected + "project files updated.");
 		return result;
 
+	}
+
+	public int getChangeID(int fid, int pid) {
+		String statement = " SELECT " + Columns.ProjectFiles_CID + " FROM "
+				+ Tables.PROJECT_FILES + " WHERE " + Columns.ProjectFiles_PID
+				+ " = " + pid + " AND " + Columns.ProjectFiles_CID + " IN "
+				+ "( SELECT " + Columns.Changes_ID + " FROM " + Tables.CHANGES
+				+ " WHERE " + Columns.Changes_FID + "=" + fid + ")";
+		ResultSet rs = db.executeStatement(statement);
+		try {
+			if (rs.first()) {
+				return rs.getInt(Columns.ProjectFiles_CID.toString());
+			}
+		} catch (SQLException e) {
+			Logger.logERROR(e, statement);
+		}
+		return 0;
+	}
+
+	public int getFileID(String file_rpath, int pid) {
+		String statement;
+		statement = "SELECT " + Columns.ProjectFiles_CID + " FROM "
+				+ Tables.PROJECT_FILES + " WHERE " + Columns.Projects_ID + "=" + pid + " AND " + Columns.ProjectFiles_RPath + "=\"" + file_rpath + "\""  ;
+		ResultSet nrs = db.executeStatement(statement);
+		int cid = 0;
+		try {
+			nrs.first();
+			cid = nrs.getInt(Columns.ProjectFiles_CID.toString());
+		} catch (SQLException e) {
+			Logger.logERROR(e);
+		}
+		return cid;
 	}
 
 }
