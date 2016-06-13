@@ -96,8 +96,10 @@
     <Compile Include="tasks\RequestTask.cs" />
     <Compile Include="tasks\SaveChangesTask.cs" />
     <Compile Include="tasks\Task.cs" />
+    <Compile Include="tasks\UploadFileOnParts.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="files\FileStatus.cs" />
+    <Compile Include="tools\Config.cs" />
     <Compile Include="tools\FileBlockMessage.cs" />
     <Compile Include="tools\Messages.cs" />
     <Compile Include="tools\JSONManipulator.cs" />

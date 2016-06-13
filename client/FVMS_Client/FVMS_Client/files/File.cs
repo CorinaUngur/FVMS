@@ -31,14 +31,7 @@ namespace FVMS_Client.files
             this.fileStatus = FileStatus.UPTODATE;
         }
 
-        public void setFileOnDisk(String file_path, byte[] file_content)
-        {
-            this.boundedFilePath = Path.GetFullPath(file_path);
-            writeFileOnDisk(file_content);
-            createFileWatcherOnFile();
-        }
-
-        private void createFileWatcherOnFile()
+        public void createFileWatcherOnFile()
         {
             this.fileWatcher = new FileSystemWatcher();
             fileWatcher.Path += Path.GetDirectoryName(boundedFilePath);
@@ -48,23 +41,6 @@ namespace FVMS_Client.files
             fileWatcher.Changed += OnChanged;
             fileWatcher.Deleted += OnDeleted;
             fileWatcher.EnableRaisingEvents = true;
-        }
-
-        private void writeFileOnDisk(byte[] file_content)
-        {
-            try
-            {
-                System.IO.FileStream fileStream =
-                   new System.IO.FileStream(boundedFilePath, System.IO.FileMode.Create,
-                                            System.IO.FileAccess.Write);
-                fileStream.Write(file_content, 0, file_content.Length);
-                fileStream.Close();
-            }
-            catch (Exception _Exception)
-            {
-                Console.WriteLine("Exception caught in process: {0}",
-                                  _Exception.ToString());
-            }
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)

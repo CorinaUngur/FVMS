@@ -24,6 +24,14 @@ public class InitializationClass {
 
 	private static void createRootAndTrashFolders() {
 		File rootFolder = new File(Settings.FS_ROOTFOLDER);
+		createFolder(rootFolder);
+		File trashFolder = new File(Settings.TRASH_FOLDER);
+		createFolder(trashFolder);
+		File tempFolder = new File(Settings.TEMP_PATH);
+		createFolder(tempFolder);
+	}
+
+	private static void createFolder(File rootFolder) {
 		if (!rootFolder.exists()) {
 			boolean rootFolderCreated = rootFolder.mkdir();
 			if (rootFolderCreated) {
@@ -35,18 +43,6 @@ public class InitializationClass {
 		} else {
 
 			Logger.logINFO("Root folder already exists");
-		}
-		File trashFolder = new File(Settings.TRASH_FOLDER);
-		if (!trashFolder.exists()) {
-			boolean trashFolderCreated = trashFolder.mkdir();
-			if (trashFolderCreated) {
-				Logger.logINFO("Trash folder created to path:"
-						+ trashFolder.getPath());
-			} else {
-				Logger.logINFO("trash folder was not created");
-			}
-		} else {
-			Logger.logINFO("Trash folder exists");
 		}
 	}
 

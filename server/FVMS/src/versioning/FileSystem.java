@@ -2,9 +2,10 @@ package versioning;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import utils.Logger;
 import utils.Tools;
@@ -18,20 +19,21 @@ public class FileSystem {
 	private FileSystemDB fsdb = FileSystemDB.getInstance();
 	private ProjectsDB pdb = ProjectsDB.getInstance();
 
-	public String add_newFile(byte[] file_content, String file_rpath,
-			String owner, int pid) {
+	public String add_newFile(File file, String file_rpath, String owner,
+			int pid) {
 		String result = null;
 		String file_path = null;
-		String hash = Tools.hashContent(file_content);
+		String hash;
+		hash = getFileHash(file);
 		boolean fileExistsInFS = fsdb.isFileInDB(hash);
 		if (!fileExistsInFS) {
 			int fid = fsdb.getNextAvailableID();
 			String folder_path = createFolder(fid);
 			if (folder_path != null) {
-				file_path = createFile(fid, file_rpath, file_content);
+				file_path = createFile(fid, file_rpath, file);
 				if (file_path != null) {
-					result = addnewFile_toDB(file_content, file_rpath, owner,
-							pid, file_path, fid);
+					result = addnewFile_toDB(hash, file_rpath, owner, pid,
+							file_path, fid);
 				}
 			} else {
 				result = Messages.Folder_creationFailed.toString();
@@ -42,10 +44,21 @@ public class FileSystem {
 		return result;
 	}
 
+	private String getFileHash(File file) {
+		String hash = "";
+		try {
+			FileInputStream fis = new FileInputStream(file);
+			hash = DigestUtils.md5Hex(fis);
+			fis.close();
+		} catch (IOException e) {
+			Logger.logERROR(e);
+		}
+		return hash;
+	}
+
 	private String addFileToProject(String file_rpath, int pid, String hash) {
 		String result;
-		boolean fileExistsInProjects = fsdb.isFileInProject(hash,
-				file_rpath);
+		boolean fileExistsInProjects = fsdb.isFileInProject(hash, file_rpath);
 		if (!fileExistsInProjects) {
 			int fid = fsdb.getChangeID(hash);
 			pdb.addFile_toProject(pid, fid, file_rpath);
@@ -56,10 +69,9 @@ public class FileSystem {
 		return result;
 	}
 
-	private String addnewFile_toDB(byte[] file_content, String file_rpath,
+	private String addnewFile_toDB(String hash, String file_rpath,
 			String owner, int pid, String file_path, int fid) {
 		String result;
-		String hash = Tools.hashContent(file_content);
 		String datetime = LocalDateTime.now().toString();
 		String dbResult = fsdb
 				.addNewFile(fid, owner, file_path, hash, datetime);
@@ -70,14 +82,14 @@ public class FileSystem {
 		return result;
 	}
 
-	public String addChange(int fid, int pid, String owner,
-			byte[] file_content, String file_rpath, String message) {
+	public String addChange(int fid, int pid, String owner, File file,
+			String file_rpath, String message) {
 		Messages result = null;
 		String file_name = getNameFromPath(file_rpath);
-		String file_path = createFile(fid, file_name, file_content);
+		String file_path = createFile(fid, file_name, file);
 		if (file_path != null) {
 			int oldCid = fsdb.getLastChangeID(fid);
-			String hash = Tools.hashContent(file_content);
+			String hash = getFileHash(file);
 			String datetime = LocalDateTime.now().toString();
 			String dbResult = fsdb.addChange(fid, datetime, hash, owner,
 					message, file_path);
@@ -228,8 +240,7 @@ public class FileSystem {
 		fileFolderInDest.mkdir();
 		if (fileFolderInDest.exists()) {
 			for (String file_name : folder.list()) {
-				filesMoved += moveFile(folder, fileFolderInDest,
-						file_name);
+				filesMoved += moveFile(folder, fileFolderInDest, file_name);
 			}
 		}
 		return filesMoved;
@@ -261,7 +272,7 @@ public class FileSystem {
 		return folder_path;
 	}
 
-	private String createFile(int fid, String file_rPath, byte[] file_content) {
+	private String createFile(int fid, String file_rPath, File file) {
 		String file_name = "";
 		file_name = getNameFromPath(file_rPath);
 
@@ -269,34 +280,14 @@ public class FileSystem {
 		String file_path = Settings.FS_ROOTFOLDER + fid + pathSeparator
 				+ file_name;
 		boolean file_created = false;
-		file_created = writeContent(file_content, file_path);
+		file_created = file.renameTo(new File(file_path));
 		Logger.logINFO(Messages.File_added.toString());
 		return file_created ? file_path : null;
 	}
 
-	private String getNameFromPath(String path) {
+	public String getNameFromPath(String path) {
 		String[] names = path.replace('\\', '/').split("/");
-		return names[names.length-1];
+		return names[names.length - 1];
 	}
 
-	private boolean writeContent(byte[] file_content, String file_path) {
-		FileOutputStream fos;
-		try {
-			File file = new File(file_path);
-			if (file.createNewFile()) {
-				fos = new FileOutputStream(file);
-				fos.write(file_content);
-				fos.flush();
-				fos.close();
-
-				return true;
-			} else {
-				Logger.logINFO(Messages.File_addingFailed.toString());
-				return false;
-			}
-		} catch (IOException e) {
-			Logger.logERROR(e, "Writing contet to file failed for file.");
-			return false;
-		}
-	}
 }

@@ -4,14 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FVMS_Client.files
+namespace FVMS_Client.tools
 {
-    public enum FileStatus
+    class Config
     {
-        UPTODATE,
-        CHANGED,
-        NEW,
-        DELETED,
-        SENDING
+        public static long blockSize = 60000;
     }
 }

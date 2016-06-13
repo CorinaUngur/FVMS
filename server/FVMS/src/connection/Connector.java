@@ -2,6 +2,7 @@ package connection;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -23,6 +24,7 @@ import com.rabbitmq.client.QueueingConsumer;
 
 import config.Settings;
 import connection.tasks.AddFileTask;
+import connection.tasks.AddFilesTask;
 import connection.tasks.DownloadTask;
 import connection.tasks.GetHistoryTask;
 import connection.tasks.InitTask;
@@ -42,7 +44,7 @@ public class Connector {
 	private QueueingConsumer uploadQ = null;
 	private QueueingConsumer downloadQ = null;
 	private static final ExecutorService threadpool = Executors
-			.newFixedThreadPool(10);
+			.newFixedThreadPool(100);
 
 	private static final ConcurrentLinkedQueue<Integer> loggedUsers = new ConcurrentLinkedQueue<Integer>();
 
@@ -81,7 +83,7 @@ public class Connector {
 		HashMap<String, Object> credentials = new HashMap<String, Object>();
 
 		String message = new String(deliveryBody);
-		Logger.logINFO("Received: " + message);
+		//Logger.logINFO("Received: " + message);
 		credentials = JSONManipulator.getMap(message);
 		return credentials;
 	}
@@ -102,7 +104,7 @@ public class Connector {
 		threadpool.submit(new InitTask(initQ));
 		threadpool.submit(new LogOutTask(logoutQ));
 		threadpool.submit(new GetHistoryTask(historyQ));
-		threadpool.submit(new AddFileTask(uploadQ));
+		threadpool.submit(new AddFilesTask(uploadQ));
 		threadpool.submit(new DownloadTask(downloadQ));
 	}
 
@@ -161,5 +163,15 @@ public class Connector {
 			Logger.logERROR(e);
 		}
 
+	}
+
+	public void startAddFileTask(String queue, LinkedHashMap<String, Object> f) {
+		try {
+			QueueingConsumer fileConsumer = startConsuming(queue, null);
+			threadpool.submit(new AddFileTask(fileConsumer,f));
+		} catch (IOException e) {
+			Logger.logERROR(e);
+		}
+		
 	}
 }

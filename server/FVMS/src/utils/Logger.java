@@ -19,7 +19,8 @@ public class Logger {
 				try {
 					writer = new PrintStream(logFile);
 				} catch (IOException e) {
-				System.out.println("Log writer creation failed: " + e.getMessage());
+					System.out.println("Log writer creation failed: "
+							+ e.getMessage());
 				}
 			} else {
 				System.out.println("Log file not found");
@@ -30,19 +31,19 @@ public class Logger {
 
 	}
 
-	public static void log(Level level, Exception e, String message) {
+	public static void log(Level level, Throwable e, String message) {
 		String log_msq = level.toString() + ": " + message
 				+ "\n Error message:" + e.getMessage();
 		writer.println(log_msq);
 
 	}
 
-	public static void logERROR(Exception e, String message) {
+	public static void logERROR(Throwable e, String message) {
 		write("ERROR" + "\t" + message + "\nException message: "
 				+ e.getMessage());
 	}
 
-	public static void logERROR(Exception e) {
+	public static void logERROR(Throwable e) {
 		write("ERROR" + "\t" + "\nException message: " + e.getMessage());
 	}
 

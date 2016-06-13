@@ -100,6 +100,7 @@ namespace FVMS_Client
             if (file.checkContent(hash))
             {
                 //Do something here
+                file.createFileWatcherOnFile();
             }
         }
 

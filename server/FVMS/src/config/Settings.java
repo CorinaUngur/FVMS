@@ -32,6 +32,8 @@ public class Settings {
 		TRASH_MAXSIZE = Integer.parseInt(properties.getProperty("trash_limit"));
 		TRASH_FOLDER = properties.getProperty("trash_folder");
 		
+		TEMP_PATH = properties.getProperty("temp_path");
+		
 		FS_ROOTFOLDER = properties.getProperty("fileSystem_rootFolder");
 		
 		CONN_QLOGIN = properties.getProperty("conn_loginQueue");
@@ -55,6 +57,7 @@ public class Settings {
 	public static boolean TRASH_ENABLED = true;
 	public static int TRASH_EXPTIME = 10;
 	public static int TRASH_MAXSIZE = 1024;
+	public static String TEMP_PATH = "./TEMP";
 	public static String TRASH_FOLDER="./TRASH";
 	public static String FS_ROOTFOLDER = "./";
 	public static String CONN_QLOGIN="QLogin";

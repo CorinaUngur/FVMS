@@ -28,5 +28,6 @@
 		<dependency org="mysql" name="mysql-connector-java" rev="6.0.2"/>
 		<dependency org="com.rabbitmq" name="amqp-client" rev="3.6.1"/>
 		<dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.7.4"/>
+		<dependency org="commons-codec" name="commons-codec" rev="1.9"/>
 	</dependencies>
 </ivy-module>
