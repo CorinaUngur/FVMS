@@ -60,19 +60,7 @@ namespace FVMS_Client.files
             fileStatus = FileStatus.CHANGED;
         }
 
-        public class FileInFolder : File
-        {
-            public FileInFolder(int pid, String path, String filePath,  String authName) : base(0,pid, path, "","",authName)
-        {
-            this.name = Path.GetFileName(filePath);
-            if (!name.Equals(path))
-            {
-                this.path += "/" + name;
-            }
-            this.fileStatus = FileStatus.NEW;
-            this.boundedFilePath = filePath;
-        }
-        }
+        
 
         internal void appendContent(byte[] content)
         {
@@ -104,6 +92,24 @@ namespace FVMS_Client.files
             FileStream stream = System.IO.File.OpenRead(boundedFilePath);
             byte[] receivedHash = md5.ComputeHash(stream);
             return receivedHash.Equals(hash);
+        }
+        public class FileInFolder : File
+        {
+            public FileInFolder(int pid, String path, String filePath, String authName)
+                : base(0, pid, path, "", "", authName)
+            {
+                this.name = Path.GetFileName(filePath);
+                if (!name.Equals(path))
+                {
+                    if (this.path.Length > 0)
+                    {
+                        this.path += "/";
+                    }
+                    this.path += name;
+                }
+                this.fileStatus = FileStatus.NEW;
+                this.boundedFilePath = filePath;
+            }
         }
     }
 }

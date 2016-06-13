@@ -25,7 +25,8 @@ namespace FVMS_Client.forms
         public void GenerateTree(List<Folder> rootFolders)
         {
             nodesFoldersDict.Clear();
-            foldersTree.Nodes.Clear();
+            this.foldersTree.Nodes.Clear();
+            this.foldersTree.Refresh();
             foreach (Folder fld in rootFolders)
             {
                 foldersTree.Nodes.Add(addFolderInTree(fld));
@@ -92,7 +93,6 @@ namespace FVMS_Client.forms
 
         private void refreshButton_Click(object sender, EventArgs e)
         {
-            foldersTree.Nodes.Clear();
             Controller.getInstance().Init();
         }
 
@@ -260,6 +260,7 @@ namespace FVMS_Client.forms
                     default: f.fileStatus = FileStatus.DELETED; filesOnServer.Add(f); break;
                 }
             }
+            filesGrid.Refresh();
         }
 
         private void addFileButton_Click(object sender, EventArgs e)
@@ -284,12 +285,13 @@ namespace FVMS_Client.forms
                     }
                     else
                     {
-                        path = folder.path.Substring(folder.name.Length - 1);
+                        path = folder.path.Substring(folder.name.Length+1);
                     }
                     
                     File file = new File.FileInFolder(folder.pid, path, file_name, LoggedUser.Name);
                     folder.addFile(file);
                     filesGrid.DataSource = folder.GetFiles();
+                    filesGrid.Refresh();
                 }
             }
             }

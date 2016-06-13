@@ -38,6 +38,7 @@ namespace FVMS_Client.beans
             if (!childs.Contains(folder))
             {
                 childs.Add(folder);
+                folder.pid = this.pid;
             }
         }
 

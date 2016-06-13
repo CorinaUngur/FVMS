@@ -18,7 +18,6 @@ namespace FVMS_Client.tasks
         public override Dictionary<string, object> prepareMessage()
         {
             Dictionary<string, object> msg = new Dictionary<string, object>();
-            msg.Add("uid", LoggedUser.uid);
             return msg;
         }
     }

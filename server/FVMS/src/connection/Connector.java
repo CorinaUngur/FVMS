@@ -24,7 +24,7 @@ import com.rabbitmq.client.QueueingConsumer;
 
 import config.Settings;
 import connection.tasks.AddFileTask;
-import connection.tasks.AddFilesTask;
+import connection.tasks.UpdateFilesTask;
 import connection.tasks.DownloadTask;
 import connection.tasks.GetHistoryTask;
 import connection.tasks.InitTask;
@@ -104,7 +104,7 @@ public class Connector {
 		threadpool.submit(new InitTask(initQ));
 		threadpool.submit(new LogOutTask(logoutQ));
 		threadpool.submit(new GetHistoryTask(historyQ));
-		threadpool.submit(new AddFilesTask(uploadQ));
+		threadpool.submit(new UpdateFilesTask(uploadQ));
 		threadpool.submit(new DownloadTask(downloadQ));
 	}
 

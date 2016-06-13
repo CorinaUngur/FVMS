@@ -10,11 +10,11 @@ namespace FVMS_Client.files
 {
     class FilesHandler
     {
-        private ConcurrentQueue<Folder> foldersQueue;
+        private List<Folder> foldersQueue;
         private static FilesHandler instance;
         private FilesHandler()
         {
-            foldersQueue = new ConcurrentQueue<Folder>();
+            foldersQueue = new List<Folder>();
         }
         public static FilesHandler getInstance()
         {
@@ -25,13 +25,14 @@ namespace FVMS_Client.files
             return instance;
         }
 
-        public List<Folder> addFolders(string projects)
+        public List<Folder> initializeFolders(string projects)
         {
+            foldersQueue.Clear();
            Dictionary<String, Folder> foldersMap = new Dictionary<string,Folder>();
            List<Folder> initialFolders = JSONManipulator.DeserializeList<Folder>(projects);
            foreach (Folder fld in initialFolders)
            {
-               foldersQueue.Enqueue(fld);
+               foldersQueue.Add(fld);
                foldersMap.Add(fld.name, fld);
                fld.path = fld.name;
                List<File> filesInInitialFolder = fld.GetFiles();

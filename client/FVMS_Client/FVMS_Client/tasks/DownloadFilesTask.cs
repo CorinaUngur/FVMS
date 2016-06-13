@@ -30,7 +30,6 @@ namespace FVMS_Client.tasks
                 filesIDs.Add(f.id);
             }
             message.Add("fids", filesIDs);
-            message.Add("uid", LoggedUser.uid);
             message.Add("pid", pid);
             foreach (File f in files)
             {

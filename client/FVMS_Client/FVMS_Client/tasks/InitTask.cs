@@ -22,14 +22,13 @@ namespace FVMS_Client.tasks
             Object outVal;
             response.TryGetValue("projects", out outVal);
             String outString = outVal.ToString();
-            List<Folder> folders = FilesHandler.getInstance().addFolders(outString);
+            List<Folder> folders = FilesHandler.getInstance().initializeFolders(outString);
             FormsHandler.createProjectsTree(folders);
         }
 
         public override Dictionary<string, object> prepareMessage()
         {
             Dictionary<string, object> mesg = new Dictionary<string,object>();
-            mesg.Add("uid", LoggedUser.uid);
             return mesg;
         }
     }

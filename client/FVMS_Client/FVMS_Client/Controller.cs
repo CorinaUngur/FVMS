@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FVMS_Client.tasks;
 using FVMS_Client.files;
 using System.Runtime.Serialization.Formatters.Binary;
+using FVMS_Client.tools;
 
 namespace FVMS_Client
 {
@@ -53,7 +54,7 @@ namespace FVMS_Client
             var props = channel.CreateBasicProperties();
             props.ReplyTo = replyQueueName;
             props.CorrelationId = corrId;
-
+            dictMessage.Add("uid", LoggedUser.uid);
             var messageBytes = JSONManipulator.getSendingJason(dictMessage);
             channel.BasicPublish(exchange: "",
                                  routingKey: queue,
